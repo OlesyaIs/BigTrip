@@ -10,19 +10,19 @@ export default class PointsModel {
   #offerPack = structuredClone(OfferPack);
   #typePack = structuredClone(TypePack);
 
-  getPoints() {
+  get points() {
     return this.#points;
   }
 
-  getDestinations() {
+  get destinations() {
     return this.#destinations;
   }
 
-  getOfferPack() {
+  get offerPack() {
     return this.#offerPack;
   }
 
-  getTypePack() {
+  get typePack() {
     return this.#typePack;
   }
 }

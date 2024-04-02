@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { getRandomIntegerWitinRange, formatToScreamingSnakeCase, getRandomArrayElement, getSomeRandomArrayElements } from '../utils.js';
+import { getRandomIntegerWitinRange, formatToScreamingSnakeCase, getRandomArrayElement, getSomeRandomArrayElements } from '../utils/common-utils.js';
 import { TypePack } from './type-pack.js';
 import { DESTINATIONS } from './destination.js';
 import { OfferPack } from './offer-pack.js';

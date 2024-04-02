@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getInteger, getStringWithUpperCaseFirst, formatFullDate, formatDate, formatTime, getDuration } from '../utils.js';
+import { getInteger, getStringWithUpperCaseFirst } from '../utils/common-utils.js';
+import { formatFullDate, formatDate, formatTime, getDuration } from '../utils/date-utils.js';
 import { ButtonFavoriteClassName } from '../const.js';
 
 const createDateTemplate = (startDate) => `<time class="event__date" datetime=${formatFullDate(startDate)}>${formatDate(startDate)}</time>`;
@@ -96,18 +97,26 @@ const createPointTemplate = (point, destination, offers) => (
 );
 
 export default class PointView extends AbstractView {
-  #point;
-  #destination;
-  #offers;
+  #point = null;
+  #destination = null;
+  #offers = null;
+  #onClickCallback = null;
 
-  constructor(currentPoint, currentDestination, offers) {
+  constructor({currentPoint, currentDestination, offers, onClick}) {
     super();
     this.#point = currentPoint;
     this.#destination = currentDestination;
     this.#offers = offers;
+    this.#onClickCallback = onClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
   }
 
   get template() {
     return createPointTemplate(this.#point, this.#destination, this.#offers);
   }
+
+  #onClick = (evt) => {
+    evt.preventDefault();
+    this.#onClickCallback();
+  };
 }
