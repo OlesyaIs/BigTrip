@@ -1,4 +1,4 @@
-import { RenderPosition, render } from '../render.js';
+import { RenderPosition, render } from '../framework/render.js';
 import { formatToScreamingSnakeCase } from '../utils.js';
 
 import TripInfoView from '../view/trip-info-view.js';
@@ -11,7 +11,7 @@ import PointView from '../view/point-view.js';
 
 export default class TripPresenter {
   pointsListComponent = new PointsListView();
-  pointsListItemComponent = new PointItemView();
+  // pointsListItemComponent = new PointItemView();
 
   constructor({tripInfoContainer, filterContainer, tripPointsContainer, pointsModel}) {
     this.tripInfoContainer = tripInfoContainer;
@@ -30,8 +30,8 @@ export default class TripPresenter {
     render(new FilterView(), this.filterContainer);
     render(new SortView(), this.tripPointsContainer);
     render(this.pointsListComponent, this.tripPointsContainer);
-    render(this.pointsListItemComponent, this.pointsListComponent.getElement());
-    render(new PointEditView(this.typePack, this.destinations, this.offerPack), this.pointsListItemComponent.getElement());
+    // render(this.pointsListItemComponent, this.pointsListComponent.element);
+    // render(new PointEditView(this.typePack, this.destinations, this.offerPack), this.pointsListItemComponent.element);
 
     for (let i = 0; i < this.tripPoints.length; i++) {
       const currentPoint = this.tripPoints[i];
@@ -40,12 +40,13 @@ export default class TripPresenter {
       const currentTypeFullOffers = this.offerPack[currentPointKeyType];
 
       const newItemComponent = new PointItemView();
+      const pointEditComponent = new PointEditView(this.typePack, this.destinations, this.offerPack, currentPoint);
 
-      render(newItemComponent, this.pointsListComponent.getElement());
-      render(new PointView(currentPoint, currentDestination, currentTypeFullOffers), newItemComponent.getElement());
+      render(newItemComponent, this.pointsListComponent.element);
+      render(new PointView(currentPoint, currentDestination, currentTypeFullOffers), newItemComponent.element);
 
       // Посмотреть, как рендерится форма редактирования созданных точек:
-      // render(new PointEditView(this.typePack, this.destinations, this.offerPack, currentPoint), newItemComponent.getElement());
+      // render(new PointEditView(this.typePack, this.destinations, this.offerPack, currentPoint), newItemComponent.element);
     }
   }
 }

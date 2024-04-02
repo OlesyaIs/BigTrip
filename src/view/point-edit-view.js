@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase, huminizeFullDate } from '../utils.js';
 
 const createEmptyPoint = (typePack) => {
@@ -172,27 +172,21 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
   );
 };
 
-export default class PointEditView {
+export default class PointEditView extends AbstractView {
+  #typePack;
+  #destinations;
+  #offerPack;
+  #currentPoint;
+
   constructor(typePack, destinations, offerPack, currentPoint) {
-    this.typePack = typePack;
-    this.destinations = destinations;
-    this.offerPack = offerPack;
-    this.currentPoint = currentPoint ? currentPoint : '';
+    super();
+    this.#typePack = typePack;
+    this.#destinations = destinations;
+    this.#offerPack = offerPack;
+    this.#currentPoint = currentPoint ? currentPoint : '';
   }
 
-  getTemplate() {
-    return createPointEditTemplate(this.typePack, this.destinations, this.offerPack, this.currentPoint);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this.#currentPoint);
   }
 }
