@@ -75,12 +75,12 @@ export default class TripPresenter {
 
     function openEditPointForm() {
       replace(pointEditComponent, pointComponent);
-      document.body.addEventListener('keydown', onEscKeydown);
+      document.addEventListener('keydown', onEscKeydown);
     }
 
     function closeEditPointForm() {
       replace(pointComponent, pointEditComponent);
-      document.body.removeEventListener('keydown', onEscKeydown);
+      document.removeEventListener('keydown', onEscKeydown);
     }
 
     render(newItemComponent, this.#pointsListComponent.element);
