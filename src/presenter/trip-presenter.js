@@ -1,5 +1,5 @@
-import { RenderPosition, render } from '../render.js';
-import { formatToScreamingSnakeCase } from '../utils.js';
+import { RenderPosition, render, replace } from '../framework/render.js';
+import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
 
 import TripInfoView from '../view/trip-info-view.js';
 import FilterView from '../view/filter-view.js';
@@ -10,42 +10,91 @@ import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
 
 export default class TripPresenter {
-  pointsListComponent = new PointsListView();
-  pointsListItemComponent = new PointItemView();
+  #pointsListComponent = new PointsListView();
+  #tripInfoContainer = null;
+  #filterContainer = null;
+  #tripPointsContainer = null;
+  #pointsModel = null;
+
+  #tripPoints = [];
+  #destinations = [];
+  #offerPack = {};
+  #typePack = {};
 
   constructor({tripInfoContainer, filterContainer, tripPointsContainer, pointsModel}) {
-    this.tripInfoContainer = tripInfoContainer;
-    this.filterContainer = filterContainer;
-    this.tripPointsContainer = tripPointsContainer;
-    this.pointsModel = pointsModel;
+    this.#tripInfoContainer = tripInfoContainer;
+    this.#filterContainer = filterContainer;
+    this.#tripPointsContainer = tripPointsContainer;
+    this.#pointsModel = pointsModel;
   }
 
   init() {
-    this.tripPoints = [...this.pointsModel.getPoints()];
-    this.destinations = [...this.pointsModel.getDestinations()];
-    this.offerPack = structuredClone(this.pointsModel.getOfferPack());
-    this.typePack = structuredClone(this.pointsModel.getTypePack());
+    this.#tripPoints = [...this.#pointsModel.points];
+    this.#destinations = [...this.#pointsModel.destinations];
+    this.#offerPack = structuredClone(this.#pointsModel.offerPack);
+    this.#typePack = structuredClone(this.#pointsModel.typePack);
 
-    render(new TripInfoView(), this.tripInfoContainer, RenderPosition.AFTERBEGIN);
-    render(new FilterView(), this.filterContainer);
-    render(new SortView(), this.tripPointsContainer);
-    render(this.pointsListComponent, this.tripPointsContainer);
-    render(this.pointsListItemComponent, this.pointsListComponent.getElement());
-    render(new PointEditView(this.typePack, this.destinations, this.offerPack), this.pointsListItemComponent.getElement());
+    this.#renderTrip();
+  }
 
-    for (let i = 0; i < this.tripPoints.length; i++) {
-      const currentPoint = this.tripPoints[i];
-      const currentPointKeyType = formatToScreamingSnakeCase(currentPoint.type);
-      const currentDestination = this.destinations.find((destination) => destination.id === currentPoint.destination);
-      const currentTypeFullOffers = this.offerPack[currentPointKeyType];
+  #renderTripInfo(container) {
+    render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
+  }
 
-      const newItemComponent = new PointItemView();
+  #renderPoint(point) {
+    const currentPoint = point;
+    const currentPointKeyType = formatToScreamingSnakeCase(currentPoint.type);
+    const currentDestination = this.#destinations.find((destination) => destination.id === currentPoint.destination);
+    const currentTypeFullOffers = this.#offerPack[currentPointKeyType];
+    const newItemComponent = new PointItemView();
 
-      render(newItemComponent, this.pointsListComponent.getElement());
-      render(new PointView(currentPoint, currentDestination, currentTypeFullOffers), newItemComponent.getElement());
+    const pointComponent = new PointView({
+      currentPoint,
+      currentDestination,
+      offers: currentTypeFullOffers,
+      onClick: openEditPointForm,
+    });
 
-      // Посмотреть, как рендерится форма редактирования созданных точек:
-      // render(new PointEditView(this.typePack, this.destinations, this.offerPack, currentPoint), newItemComponent.getElement());
+    const pointEditComponent = new PointEditView({
+      typePack: this.#typePack,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      currentPoint,
+      onSubmit: closeEditPointForm,
+      onClick: closeEditPointForm,
+    });
+
+    const onEscKeydown = function(evt) {
+      if (!isEscKeydown(evt)) {
+        return;
+      }
+
+      evt.preventDefault();
+      closeEditPointForm();
+    };
+
+    function openEditPointForm() {
+      replace(pointEditComponent, pointComponent);
+      document.addEventListener('keydown', onEscKeydown);
+    }
+
+    function closeEditPointForm() {
+      replace(pointComponent, pointEditComponent);
+      document.removeEventListener('keydown', onEscKeydown);
+    }
+
+    render(newItemComponent, this.#pointsListComponent.element);
+    render(pointComponent, newItemComponent.element);
+  }
+
+  #renderTrip() {
+    this.#renderTripInfo(this.#tripInfoContainer);
+    render(new FilterView(), this.#filterContainer);
+    render(new SortView(), this.#tripPointsContainer);
+    render(this.#pointsListComponent, this.#tripPointsContainer);
+
+    for (let i = 0; i < this.#tripPoints.length; i++) {
+      this.#renderPoint(this.#tripPoints[i]);
     }
   }
 }

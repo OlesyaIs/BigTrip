@@ -1,8 +1,3 @@
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-// const duration = require('dayjs/plugin/duration');
-dayjs.extend(duration);
-
 const getInteger = (string) => parseInt(string, 10);
 
 const getRandomIntegerWitinRange = (min, max) => {
@@ -72,20 +67,8 @@ const getSomeRandomArrayElements = (array, elementsQuantity = 0) => {
 
 const sortArrayToIncrease = (array) => array.sort((a, b) => (a - b));
 
-// Date formatting
-const SHORT_DATE_FORMAT = 'MMM D';
-const TIME_FORMAT = 'HH:mm';
-const FULL_DATE_FORMAT = 'YY/MM/DD HH:mm';
-
-const formatSomeDate = (date, format) => date ? dayjs(date).format(format ? format : '') : '';
-
-const formatFullDate = (date) => formatSomeDate(date);
-const huminizeFullDate = (date) => formatSomeDate(date, FULL_DATE_FORMAT);
-const formatDate = (date) => formatSomeDate(date, SHORT_DATE_FORMAT);
-const formatTime = (date) => formatSomeDate(date, TIME_FORMAT);
-
-// Functions for duration
-const getDuration = (startDate, endDate) => dayjs.duration(dayjs(endDate).diff(dayjs(startDate)));
+// Проверки
+const isEscKeydown = (evt) => evt.key === 'Escape';
 
 export {
   getInteger,
@@ -97,9 +80,5 @@ export {
   getRandomArrayElement,
   getSomeRandomArrayElements,
   sortArrayToIncrease,
-  formatFullDate,
-  huminizeFullDate,
-  formatDate,
-  formatTime,
-  getDuration,
+  isEscKeydown,
 };

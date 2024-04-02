@@ -1,5 +1,6 @@
-import { createElement } from '../render.js';
-import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase, huminizeFullDate } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
+import { huminizeFullDate } from '../utils/date-utils.js';
 
 const createEmptyPoint = (typePack) => {
   const defaultType = Object.values(typePack)[0].type;
@@ -172,27 +173,37 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
   );
 };
 
-export default class PointEditView {
-  constructor(typePack, destinations, offerPack, currentPoint) {
-    this.typePack = typePack;
-    this.destinations = destinations;
-    this.offerPack = offerPack;
-    this.currentPoint = currentPoint ? currentPoint : '';
+export default class PointEditView extends AbstractView {
+  #typePack = null;
+  #destinations = null;
+  #offerPack = null;
+  #currentPoint = null;
+  #onSubmitCallback = null;
+  #onClickCallback = null;
+
+  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
+    super();
+    this.#typePack = typePack;
+    this.#destinations = destinations;
+    this.#offerPack = offerPack;
+    this.#currentPoint = currentPoint ? currentPoint : '';
+    this.#onSubmitCallback = onSubmit;
+    this.#onClickCallback = onClick;
+    this.element.addEventListener('submit', this.#onSubmit);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
   }
 
-  getTemplate() {
-    return createPointEditTemplate(this.typePack, this.destinations, this.offerPack, this.currentPoint);
+  get template() {
+    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this.#currentPoint);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #onSubmit = (evt) => {
+    evt.preventDefault();
+    this.#onSubmitCallback();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #onClick = (evt) => {
+    evt.preventDefault();
+    this.#onClickCallback();
+  };
 }
