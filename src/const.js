@@ -5,4 +5,18 @@ const ButtonFavoriteClassName = {
   ACTIVE: 'event__favorite-btn--active',
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName };
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
+
+const EmptyListMessage = {
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.FUTURE]: 'There are no future events now',
+  [FilterType.PRESENT]: 'There are no present events now',
+  [FilterType.PAST]: 'There are no past events now',
+};
+
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, EmptyListMessage };

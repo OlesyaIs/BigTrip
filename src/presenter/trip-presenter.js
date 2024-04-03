@@ -14,21 +14,25 @@ export default class TripPresenter {
   #tripInfoContainer = null;
   #filterContainer = null;
   #tripPointsContainer = null;
+  #filtersModel = null;
   #pointsModel = null;
 
+  #filters = [];
   #tripPoints = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
 
-  constructor({tripInfoContainer, filterContainer, tripPointsContainer, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsContainer, filtersModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#tripPointsContainer = tripPointsContainer;
+    this.#filtersModel = filtersModel;
     this.#pointsModel = pointsModel;
   }
 
   init() {
+    this.#filters = [...this.#filtersModel.filters];
     this.#tripPoints = [...this.#pointsModel.points];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
@@ -89,7 +93,16 @@ export default class TripPresenter {
 
   #renderTrip() {
     this.#renderTripInfo(this.#tripInfoContainer);
-    render(new FilterView(), this.#filterContainer);
+
+    const FilterViewComponent = new FilterView({filters: this.#filters});
+    const currentFilter = FilterViewComponent.element.querySelector('.trip-filters__filter-input[checked]');
+    render(FilterViewComponent, this.#filterContainer);
+
+    // if (!this.#tripPoints.length) {
+
+    //   return;
+    // }
+
     render(new SortView(), this.#tripPointsContainer);
     render(this.#pointsListComponent, this.#tripPointsContainer);
 
