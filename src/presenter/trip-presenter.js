@@ -8,27 +8,32 @@ import PointEditView from '../view/point-edit-view.js';
 import PointsListView from '../view/points-list-view.js';
 import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
+import EmptyListMessageView from '../view/empty-list-message-view.js';
 
 export default class TripPresenter {
   #pointsListComponent = new PointsListView();
   #tripInfoContainer = null;
   #filterContainer = null;
   #tripPointsContainer = null;
+  #filtersModel = null;
   #pointsModel = null;
 
+  #filters = [];
   #tripPoints = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
 
-  constructor({tripInfoContainer, filterContainer, tripPointsContainer, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsContainer, filtersModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#tripPointsContainer = tripPointsContainer;
+    this.#filtersModel = filtersModel;
     this.#pointsModel = pointsModel;
   }
 
   init() {
+    this.#filters = [...this.#filtersModel.filters];
     this.#tripPoints = [...this.#pointsModel.points];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
@@ -87,14 +92,27 @@ export default class TripPresenter {
     render(pointComponent, newItemComponent.element);
   }
 
-  #renderTrip() {
-    this.#renderTripInfo(this.#tripInfoContainer);
-    render(new FilterView(), this.#filterContainer);
+  #renderPointsDesk(currentFilter) {
+    if (!this.#tripPoints.length) {
+      render(new EmptyListMessageView({currentFilter}), this.#tripPointsContainer);
+      return;
+    }
+
     render(new SortView(), this.#tripPointsContainer);
     render(this.#pointsListComponent, this.#tripPointsContainer);
 
     for (let i = 0; i < this.#tripPoints.length; i++) {
       this.#renderPoint(this.#tripPoints[i]);
     }
+  }
+
+  #renderTrip() {
+    this.#renderTripInfo(this.#tripInfoContainer);
+
+    const FilterViewComponent = new FilterView({filters: this.#filters});
+    const currentFilter = FilterViewComponent.element.querySelector('.trip-filters__filter-input[checked]');
+    render(FilterViewComponent, this.#filterContainer);
+
+    this.#renderPointsDesk(currentFilter);
   }
 }
