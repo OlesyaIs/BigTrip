@@ -19,4 +19,9 @@ const EmptyListMessage = {
   [FilterType.PAST]: 'There are no past events now',
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, EmptyListMessage };
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, EmptyListMessage, Mode };

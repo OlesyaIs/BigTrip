@@ -1,20 +1,14 @@
-import { RenderPosition, render, replace } from '../framework/render.js';
-import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
+import { RenderPosition, render } from '../framework/render.js';
+import { updateItem } from '../utils/common-utils.js';
 
 import TripInfoView from '../view/trip-info-view.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
-import PointEditView from '../view/point-edit-view.js';
 import PointsListView from '../view/points-list-view.js';
-import PointItemView from '../view/point-item-view.js';
-import PointView from '../view/point-view.js';
 import EmptyListMessageView from '../view/empty-list-message-view.js';
+import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
-  #pointsListComponent = new PointsListView();
-  #tripInfoContainer = null;
-  #filterContainer = null;
-  #tripPointsContainer = null;
   #filtersModel = null;
   #pointsModel = null;
 
@@ -23,6 +17,14 @@ export default class TripPresenter {
   #destinations = [];
   #offerPack = {};
   #typePack = {};
+
+  #pointsListComponent = new PointsListView();
+  #tripInfoContainer = null;
+  #filterContainer = null;
+  #tripPointsContainer = null;
+  #filtersComponent = null;
+
+  #pointPresenters = new Map();
 
   constructor({tripInfoContainer, filterContainer, tripPointsContainer, filtersModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
@@ -42,77 +44,61 @@ export default class TripPresenter {
     this.#renderTrip();
   }
 
+  #handlePointChange = (updatedPoint) => {
+    this.#tripPoints = updateItem(this.#tripPoints, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#destinations, this.#offerPack, this.#typePack);
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #renderTripInfo(container) {
     render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
   }
 
-  #renderPoint(point) {
-    const currentPoint = point;
-    const currentPointKeyType = formatToScreamingSnakeCase(currentPoint.type);
-    const currentDestination = this.#destinations.find((destination) => destination.id === currentPoint.destination);
-    const currentTypeFullOffers = this.#offerPack[currentPointKeyType];
-    const newItemComponent = new PointItemView();
-
-    const pointComponent = new PointView({
-      currentPoint,
-      currentDestination,
-      offers: currentTypeFullOffers,
-      onClick: openEditPointForm,
-    });
-
-    const pointEditComponent = new PointEditView({
-      typePack: this.#typePack,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
-      currentPoint,
-      onSubmit: closeEditPointForm,
-      onClick: closeEditPointForm,
-    });
-
-    const onEscKeydown = function(evt) {
-      if (!isEscKeydown(evt)) {
-        return;
-      }
-
-      evt.preventDefault();
-      closeEditPointForm();
-    };
-
-    function openEditPointForm() {
-      replace(pointEditComponent, pointComponent);
-      document.addEventListener('keydown', onEscKeydown);
-    }
-
-    function closeEditPointForm() {
-      replace(pointComponent, pointEditComponent);
-      document.removeEventListener('keydown', onEscKeydown);
-    }
-
-    render(newItemComponent, this.#pointsListComponent.element);
-    render(pointComponent, newItemComponent.element);
+  #renderFilters(container) {
+    this.#filtersComponent = new FilterView({filters: this.#filters});
+    render(this.#filtersComponent, container);
   }
 
-  #renderPointsDesk(currentFilter) {
-    if (!this.#tripPoints.length) {
-      render(new EmptyListMessageView({currentFilter}), this.#tripPointsContainer);
-      return;
-    }
+  #renderSort(container) {
+    render(new SortView(), container);
+  }
 
-    render(new SortView(), this.#tripPointsContainer);
-    render(this.#pointsListComponent, this.#tripPointsContainer);
+  #renderPoint(point) {
+    const pointPresenter = new PointPresenter({
+      pointListContainer: this.#pointsListComponent.element,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange,
+    });
+    pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
+    this.#pointPresenters.set(point.id, pointPresenter);
+  }
+
+  #renderPointList(container) {
+    render(this.#pointsListComponent, container);
 
     for (let i = 0; i < this.#tripPoints.length; i++) {
       this.#renderPoint(this.#tripPoints[i]);
     }
   }
 
+  #renderPointsDesk(container, currentFilter) {
+    if (!this.#tripPoints.length) {
+      render(new EmptyListMessageView({currentFilter}), container);
+      return;
+    }
+
+    this.#renderSort(container);
+    this.#renderPointList(container);
+  }
+
   #renderTrip() {
     this.#renderTripInfo(this.#tripInfoContainer);
+    this.#renderFilters(this.#filterContainer);
 
-    const FilterViewComponent = new FilterView({filters: this.#filters});
-    const currentFilter = FilterViewComponent.element.querySelector('.trip-filters__filter-input[checked]');
-    render(FilterViewComponent, this.#filterContainer);
-
-    this.#renderPointsDesk(currentFilter);
+    const currentFilter = this.#filtersComponent.element.querySelector('.trip-filters__filter-input[checked]');
+    this.#renderPointsDesk(this.#tripPointsContainer, currentFilter);
   }
 }

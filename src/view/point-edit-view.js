@@ -6,6 +6,7 @@ const createEmptyPoint = (typePack) => {
   const defaultType = Object.values(typePack)[0].type;
 
   return {
+    id: '',
     type: defaultType,
     dateFrom: null,
     dateTo: null,
@@ -149,7 +150,7 @@ const createDestinationInfoTemplate = (currentDestination) => {
 };
 
 const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint) => {
-  const editedPoint = currentPoint ? currentPoint : createEmptyPoint(typePack);
+  const editedPoint = currentPoint;
   const types = Object.values(typePack).map((element) => element.type);
   const keyType = formatToScreamingSnakeCase(editedPoint.type);
   const currentDestination = destinations.find((destination) => destination.id === editedPoint.destination);
@@ -178,17 +179,17 @@ export default class PointEditView extends AbstractView {
   #destinations = null;
   #offerPack = null;
   #currentPoint = null;
-  #onSubmitCallback = null;
-  #onClickCallback = null;
+  #handleSubmit = null;
+  #handleClick = null;
 
   constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
     super();
     this.#typePack = typePack;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
-    this.#currentPoint = currentPoint ? currentPoint : '';
-    this.#onSubmitCallback = onSubmit;
-    this.#onClickCallback = onClick;
+    this.#currentPoint = currentPoint ? currentPoint : createEmptyPoint(typePack);
+    this.#handleSubmit = onSubmit;
+    this.#handleClick = onClick;
     this.element.addEventListener('submit', this.#onSubmit);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
   }
@@ -199,11 +200,11 @@ export default class PointEditView extends AbstractView {
 
   #onSubmit = (evt) => {
     evt.preventDefault();
-    this.#onSubmitCallback();
+    this.#handleSubmit(this.#currentPoint);
   };
 
   #onClick = (evt) => {
     evt.preventDefault();
-    this.#onClickCallback();
+    this.#handleClick();
   };
 }

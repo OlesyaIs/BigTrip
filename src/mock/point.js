@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 import { getRandomIntegerWitinRange, formatToScreamingSnakeCase, getRandomArrayElement, getSomeRandomArrayElements } from '../utils/common-utils.js';
 import { TypePack } from './type-pack.js';
 import { DESTINATIONS } from './destination.js';
@@ -26,6 +27,7 @@ const createRandomPoint = () => {
   const keyType = formatToScreamingSnakeCase(type);
   const startDate = createRandomDate();
   return ({
+    id: nanoid(),
     type: type,
     dateFrom: startDate,
     dateTo: increaseDate(startDate),
