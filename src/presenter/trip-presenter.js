@@ -9,22 +9,22 @@ import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
-  #pointsListComponent = new PointsListView();
-  #tripInfoContainer = null;
-  #filterContainer = null;
-  #tripPointsContainer = null;
-  #filtersComponent = null;
-
   #filtersModel = null;
   #pointsModel = null;
-
-  #pointPresenters = new Map();
 
   #filters = [];
   #tripPoints = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
+
+  #pointsListComponent = new PointsListView();
+  #tripInfoContainer = null;
+  #filterContainer = null;
+  #tripPointsContainer = null;
+  #filtersComponent = null;
+
+  #pointPresenters = new Map();
 
   constructor({tripInfoContainer, filterContainer, tripPointsContainer, filtersModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
@@ -49,6 +49,10 @@ export default class TripPresenter {
     this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#destinations, this.#offerPack, this.#typePack);
   };
 
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #renderTripInfo(container) {
     render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
   }
@@ -66,6 +70,7 @@ export default class TripPresenter {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointsListComponent.element,
       onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange,
     });
     pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
     this.#pointPresenters.set(point.id, pointPresenter);
