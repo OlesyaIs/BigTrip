@@ -1,14 +1,11 @@
-import { RenderPosition, render, replace } from '../framework/render.js';
-import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
+import { RenderPosition, render } from '../framework/render.js';
 
 import TripInfoView from '../view/trip-info-view.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
-import PointEditView from '../view/point-edit-view.js';
 import PointsListView from '../view/points-list-view.js';
-import PointItemView from '../view/point-item-view.js';
-import PointView from '../view/point-view.js';
 import EmptyListMessageView from '../view/empty-list-message-view.js';
+import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
   #pointsListComponent = new PointsListView();
@@ -47,49 +44,8 @@ export default class TripPresenter {
   }
 
   #renderPoint(point) {
-    const currentPoint = point;
-    const currentPointKeyType = formatToScreamingSnakeCase(currentPoint.type);
-    const currentDestination = this.#destinations.find((destination) => destination.id === currentPoint.destination);
-    const currentTypeFullOffers = this.#offerPack[currentPointKeyType];
-    const newItemComponent = new PointItemView();
-
-    const pointComponent = new PointView({
-      currentPoint,
-      currentDestination,
-      offers: currentTypeFullOffers,
-      onClick: openEditPointForm,
-    });
-
-    const pointEditComponent = new PointEditView({
-      typePack: this.#typePack,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
-      currentPoint,
-      onSubmit: closeEditPointForm,
-      onClick: closeEditPointForm,
-    });
-
-    const onEscKeydown = function(evt) {
-      if (!isEscKeydown(evt)) {
-        return;
-      }
-
-      evt.preventDefault();
-      closeEditPointForm();
-    };
-
-    function openEditPointForm() {
-      replace(pointEditComponent, pointComponent);
-      document.addEventListener('keydown', onEscKeydown);
-    }
-
-    function closeEditPointForm() {
-      replace(pointComponent, pointEditComponent);
-      document.removeEventListener('keydown', onEscKeydown);
-    }
-
-    render(newItemComponent, this.#pointsListComponent.element);
-    render(pointComponent, newItemComponent.element);
+    const pointPresenter = new PointPresenter({pointListContainer: this.#pointsListComponent.element});
+    pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
   }
 
   #renderPointsDesk(currentFilter) {
