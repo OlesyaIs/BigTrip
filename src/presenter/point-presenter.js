@@ -16,8 +16,11 @@ export default class PointPresenter {
   #typePack = {};
   #point = null;
 
-  constructor({pointListContainer}) {
+  #handleDataChange = null;
+
+  constructor({pointListContainer, onDataChange}) {
     this.#pointListContainer = pointListContainer;
+    this.#handleDataChange = onDataChange;
   }
 
   init(point, destinations, offerPack, typePack) {
@@ -37,7 +40,8 @@ export default class PointPresenter {
       currentPoint: this.#point,
       currentDestination,
       offers: currentTypeFullOffers,
-      onClick: this.#onEditClick,
+      onClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#pointEditComponent = new PointEditView({
@@ -45,8 +49,8 @@ export default class PointPresenter {
       destinations: this.#destinations,
       offerPack: this.#offerPack,
       currentPoint: this.#point,
-      onSubmit: this.#onEditFormSubmit,
-      onClick: this.#onEditFormCancel,
+      onSubmit: this.#handleEditFormSubmit,
+      onClick: this.#handleEditFormCancel,
     });
 
     if (this.#pointItemComponent === null) {
@@ -57,15 +61,15 @@ export default class PointPresenter {
     }
 
     if (this.#pointItemComponent.element.contains(prevPointComponent.element)) {
-      replace(this.#pointEditComponent, prevPointComponent);
+      replace(this.#pointComponent, prevPointComponent);
     }
 
     if (this.#pointItemComponent.element.contains(prevPointEditComponent.element)) {
-      replace(this.#pointComponent, prevPointEditComponent);
+      replace(this.#pointEditComponent, prevPointEditComponent);
     }
   }
 
-  #onEscKeydown = (evt) => {
+  #handleEscKeydown = (evt) => {
     if (!isEscKeydown(evt)) {
       return;
     }
@@ -76,23 +80,28 @@ export default class PointPresenter {
 
   #replacePointToEditPoint() {
     replace(this.#pointEditComponent, this.#pointComponent);
-    document.addEventListener('keydown', this.#onEscKeydown);
+    document.addEventListener('keydown', this.#handleEscKeydown);
   }
 
   #replaceEditPointToPoint() {
     replace(this.#pointComponent, this.#pointEditComponent);
-    document.removeEventListener('keydown', this.#onEscKeydown);
+    document.removeEventListener('keydown', this.#handleEscKeydown);
   }
 
-  #onEditClick = () => {
+  #handleEditClick = () => {
     this.#replacePointToEditPoint();
   };
 
-  #onEditFormSubmit = () => {
+  #handleEditFormSubmit = (point) => {
+    this.#handleDataChange(point);
     this.#replaceEditPointToPoint();
   };
 
-  #onEditFormCancel = () => {
+  #handleEditFormCancel = () => {
     this.#replaceEditPointToPoint();
+  };
+
+  #handleFavoriteClick = () => {
+    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
   };
 }
