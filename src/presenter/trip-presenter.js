@@ -12,6 +12,8 @@ export default class TripPresenter {
   #tripInfoContainer = null;
   #filterContainer = null;
   #tripPointsContainer = null;
+  #filtersComponent = null;
+
   #filtersModel = null;
   #pointsModel = null;
 
@@ -43,6 +45,15 @@ export default class TripPresenter {
     render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
   }
 
+  #renderFilters(container) {
+    this.#filtersComponent = new FilterView({filters: this.#filters});
+    render(this.#filtersComponent, container);
+  }
+
+  #renderSort(container) {
+    render(new SortView(), container);
+  }
+
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({pointListContainer: this.#pointsListComponent.element});
     pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
@@ -54,7 +65,7 @@ export default class TripPresenter {
       return;
     }
 
-    render(new SortView(), this.#tripPointsContainer);
+    this.#renderSort(this.#tripPointsContainer);
     render(this.#pointsListComponent, this.#tripPointsContainer);
 
     for (let i = 0; i < this.#tripPoints.length; i++) {
@@ -64,11 +75,9 @@ export default class TripPresenter {
 
   #renderTrip() {
     this.#renderTripInfo(this.#tripInfoContainer);
+    this.#renderFilters(this.#filterContainer);
 
-    const FilterViewComponent = new FilterView({filters: this.#filters});
-    const currentFilter = FilterViewComponent.element.querySelector('.trip-filters__filter-input[checked]');
-    render(FilterViewComponent, this.#filterContainer);
-
+    const currentFilter = this.#filtersComponent.element.querySelector('.trip-filters__filter-input[checked]');
     this.#renderPointsDesk(currentFilter);
   }
 }
