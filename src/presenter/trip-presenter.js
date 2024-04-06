@@ -59,18 +59,22 @@ export default class TripPresenter {
     pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
   }
 
-  #renderPointsDesk(currentFilter) {
-    if (!this.#tripPoints.length) {
-      render(new EmptyListMessageView({currentFilter}), this.#tripPointsContainer);
-      return;
-    }
-
-    this.#renderSort(this.#tripPointsContainer);
-    render(this.#pointsListComponent, this.#tripPointsContainer);
+  #renderPointList(container) {
+    render(this.#pointsListComponent, container);
 
     for (let i = 0; i < this.#tripPoints.length; i++) {
       this.#renderPoint(this.#tripPoints[i]);
     }
+  }
+
+  #renderPointsDesk(container, currentFilter) {
+    if (!this.#tripPoints.length) {
+      render(new EmptyListMessageView({currentFilter}), container);
+      return;
+    }
+
+    this.#renderSort(container);
+    this.#renderPointList(container);
   }
 
   #renderTrip() {
@@ -78,6 +82,6 @@ export default class TripPresenter {
     this.#renderFilters(this.#filterContainer);
 
     const currentFilter = this.#filtersComponent.element.querySelector('.trip-filters__filter-input[checked]');
-    this.#renderPointsDesk(currentFilter);
+    this.#renderPointsDesk(this.#tripPointsContainer, currentFilter);
   }
 }

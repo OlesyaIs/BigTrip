@@ -7,7 +7,7 @@ import PointEditView from '../view/point-edit-view.js';
 
 export default class PointPresenter {
   #pointListContainer = null;
-  #pointItemComponent = new PointItemView();
+  #pointItemComponent = null;
   #pointComponent = null;
   #pointEditComponent = null;
 
@@ -25,6 +25,9 @@ export default class PointPresenter {
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#typePack = typePack;
+
+    const prevPointComponent = this.#pointComponent;
+    const prevPointEditComponent = this.#pointEditComponent;
 
     const currentPointKeyType = formatToScreamingSnakeCase(this.#point.type);
     const currentDestination = this.#destinations.find((destination) => destination.id === this.#point.destination);
@@ -46,8 +49,20 @@ export default class PointPresenter {
       onClick: this.#onEditFormCancel,
     });
 
-    render(this.#pointItemComponent, this.#pointListContainer);
-    render(this.#pointComponent, this.#pointItemComponent.element);
+    if (this.#pointItemComponent === null) {
+      this.#pointItemComponent = new PointItemView();
+      render(this.#pointItemComponent, this.#pointListContainer);
+      render(this.#pointComponent, this.#pointItemComponent.element);
+      return;
+    }
+
+    if (this.#pointItemComponent.element.contains(prevPointComponent.element)) {
+      replace(this.#pointEditComponent, prevPointComponent);
+    }
+
+    if (this.#pointItemComponent.element.contains(prevPointEditComponent.element)) {
+      replace(this.#pointComponent, prevPointEditComponent);
+    }
   }
 
   #onEscKeydown = (evt) => {
