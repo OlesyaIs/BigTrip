@@ -1,4 +1,4 @@
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
 import { Mode } from '../const.js';
 
@@ -71,6 +71,12 @@ export default class PointPresenter {
     if (this.#mode === Mode.EDITING) {
       replace(this.#pointEditComponent, prevPointEditComponent);
     }
+  }
+
+  destroy() {
+    remove(this.#pointItemComponent);
+    remove(this.#pointComponent);
+    remove(this.#pointEditComponent);
   }
 
   resetView() {

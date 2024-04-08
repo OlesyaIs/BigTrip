@@ -12,6 +12,14 @@ const FilterType = {
   PAST: 'past',
 };
 
+const SortType = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFER: 'offer',
+};
+
 const EmptyListMessage = {
   [FilterType.EVERYTHING]: 'Click New Event to create your first point',
   [FilterType.FUTURE]: 'There are no future events now',
@@ -24,4 +32,4 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, EmptyListMessage, Mode };
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode };
