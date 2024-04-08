@@ -7,11 +7,6 @@ import PointView from '../view/point-view.js';
 import PointEditView from '../view/point-edit-view.js';
 
 export default class PointPresenter {
-  #pointListContainer = null;
-  #pointItemComponent = null;
-  #pointComponent = null;
-  #pointEditComponent = null;
-
   #destinations = [];
   #offerPack = {};
   #typePack = {};
@@ -20,6 +15,11 @@ export default class PointPresenter {
   #mode = Mode.DEFAULT;
   #handleDataChange = null;
   #handleModeChange = null;
+
+  #pointListContainer = null;
+  #pointItemComponent = null;
+  #pointComponent = null;
+  #pointEditComponent = null;
 
   constructor({pointListContainer, onDataChange, onModeChange}) {
     this.#pointListContainer = pointListContainer;

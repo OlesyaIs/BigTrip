@@ -12,6 +12,6 @@ export default class EmptyListMessageView extends AbstractView {
   }
 
   get template() {
-    return createEmptyListMessageTemplate(this.#currentFilter.value);
+    return createEmptyListMessageTemplate(this.#currentFilter);
   }
 }
