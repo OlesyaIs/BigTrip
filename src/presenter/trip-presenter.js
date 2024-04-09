@@ -1,5 +1,6 @@
 import { RenderPosition, render } from '../framework/render.js';
 import { FilterType } from '../const.js';
+import { filterFunction } from '../utils/filter-utils.js';
 
 import TripInfoView from '../view/trip-info-view.js';
 import FilterView from '../view/filter-view.js';
@@ -10,6 +11,7 @@ export default class TripPresenter {
   #pointsModel = null;
 
   #points = [];
+  #sourcedPoints = [];
   #filters = [];
   #destinations = [];
   #offerPack = {};
@@ -33,13 +35,13 @@ export default class TripPresenter {
 
   init() {
     this.#filters = [...this.#filtersModel.filters];
-    this.#points = [...this.#pointsModel.points];
+    this.#sourcedPoints = [...this.#pointsModel.points];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
     this.#currentFilter = FilterType.EVERYTHING;
 
-
+    this.#filterPoints();
     this.#renderTripBoard();
   }
 
@@ -54,9 +56,14 @@ export default class TripPresenter {
     }
 
     this.#currentFilter = newFilter;
-    // Фильтрация точек
+
+    this.#filterPoints();
     this.#clearPointsBoard();
     this.#renderPointsBoard();
+  };
+
+  #filterPoints = () => {
+    this.#points = filterFunction[this.#currentFilter](this.#sourcedPoints);
   };
 
   #renderTripInfo(container) {
