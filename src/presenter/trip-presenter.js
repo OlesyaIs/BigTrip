@@ -38,9 +38,7 @@ export default class TripPresenter {
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
     this.#currentFilter = FilterType.EVERYTHING;
-    this.#pointsBoardPresenter = new PointsBoardPresenter({
-      pointsBoardContainer: this.#pointsBoardContainer,
-    });
+
 
     this.#renderTripBoard();
   }
@@ -56,7 +54,9 @@ export default class TripPresenter {
     }
 
     this.#currentFilter = newFilter;
-    this.#pointsBoardPresenter.init(this.#points, this.#destinations, this.#offerPack, this.#typePack, newFilter);
+    // Фильтрация точек
+    this.#clearPointsBoard();
+    this.#renderPointsBoard();
   };
 
   #renderTripInfo(container) {
@@ -68,9 +68,23 @@ export default class TripPresenter {
     render(this.#filtersComponent, container);
   }
 
+  #renderPointsBoard() {
+    this.#pointsBoardPresenter = new PointsBoardPresenter({
+      pointsBoardContainer: this.#pointsBoardContainer,
+    });
+
+    this.#pointsBoardPresenter.init(
+      this.#points,
+      this.#destinations,
+      this.#offerPack,
+      this.#typePack,
+      this.#currentFilter
+    );
+  }
+
   #renderTripBoard() {
     this.#renderTripInfo(this.#tripInfoContainer);
     this.#renderFilters(this.#filterContainer);
-    this.#pointsBoardPresenter.init(this.#points, this.#destinations, this.#offerPack, this.#typePack, this.#currentFilter);
+    this.#renderPointsBoard();
   }
 }
