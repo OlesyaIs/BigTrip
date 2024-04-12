@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
 
@@ -174,7 +174,7 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
   );
 };
 
-export default class PointEditView extends AbstractView {
+export default class PointEditView extends AbstractStatefulView {
   #typePack = null;
   #destinations = null;
   #offerPack = null;
@@ -184,18 +184,27 @@ export default class PointEditView extends AbstractView {
 
   constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
     super();
+
+    this._setState(currentPoint);
+
     this.#typePack = typePack;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#currentPoint = currentPoint ? currentPoint : createEmptyPoint(typePack);
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
-    this.element.addEventListener('submit', this.#onSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
+
+    this._restoreHandlers();
   }
 
   get template() {
-    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this.#currentPoint);
+    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state);
+  }
+
+  _restoreHandlers() {
+    this.element.addEventListener('submit', this.#onSubmit);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
   }
 
   #onSubmit = (evt) => {
@@ -207,4 +216,20 @@ export default class PointEditView extends AbstractView {
     evt.preventDefault();
     this.#handleClick();
   };
+
+  #onTypeChange = (evt) => {
+    const newType = evt.target.value;
+
+    if (this._state.type === newType) {
+      return;
+    }
+    const newTypeKey = formatToScreamingSnakeCase(newType);
+
+    this.updateElement({
+      type: newType,
+      basePrice: this.#typePack[newTypeKey].price,
+      offers: [],
+    });
+  };
+
 }
