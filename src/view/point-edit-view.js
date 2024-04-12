@@ -205,6 +205,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.element.addEventListener('submit', this.#onSubmit);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
+    this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
   }
 
   #onSubmit = (evt) => {
@@ -232,4 +233,13 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
+  #onDestinationChange = (evt) => {
+    const newDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
+
+    if (!newDestination || this._state.destination === newDestination.id) {
+      return;
+    }
+
+    this.updateElement({destination: newDestination.id});
+  };
 }
