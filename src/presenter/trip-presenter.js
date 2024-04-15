@@ -1,8 +1,13 @@
 import { RenderPosition, render } from '../framework/render.js';
 import { FilterType } from '../const.js';
 import { filterFunction } from '../utils/filter-utils.js';
+import { SortType } from '../const.js';
+import { sortFunction } from '../utils/sort-utils.js';
+import { getTripRouteDestinations, getTripCost } from '../utils/trip-info-utils.js';
 
 import TripInfoView from '../view/trip-info-view.js';
+import TripRouteView from '../view/trip-route-view.js';
+import TripCostView from '../view/trip-cost-view.js';
 import FilterView from '../view/filter-view.js';
 import PointsBoardPresenter from './points-board-presenter.js';
 
@@ -12,6 +17,7 @@ export default class TripPresenter {
 
   #points = [];
   #sourcedPoints = [];
+  #sortedAllPoints = [];
   #filters = [];
   #destinations = [];
   #offerPack = {};
@@ -21,6 +27,7 @@ export default class TripPresenter {
   #tripInfoContainer = null;
   #filterContainer = null;
   #pointsBoardContainer = null;
+  #tripInfoComponent = null;
   #filtersComponent = null;
 
   #pointsBoardPresenter = null;
@@ -36,6 +43,7 @@ export default class TripPresenter {
   init() {
     this.#filters = [...this.#filtersModel.filters];
     this.#sourcedPoints = [...this.#pointsModel.points];
+    this.#sortedAllPoints = sortFunction[SortType.DAY]([...this.#sourcedPoints]);
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
@@ -67,7 +75,17 @@ export default class TripPresenter {
   };
 
   #renderTripInfo(container) {
-    render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
+
+    this.#tripInfoComponent = new TripInfoView();
+    render(this.#tripInfoComponent, container, RenderPosition.AFTERBEGIN);
+    render(new TripRouteView({
+      destinationNames: getTripRouteDestinations(this.#sortedAllPoints, this.#destinations),
+      timing: {
+        dateFrom: this.#sortedAllPoints[0].dateFrom,
+        dateTo: this.#sortedAllPoints[this.#sortedAllPoints.length - 1].dateTo,
+      }}),
+    this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
+    render(new TripCostView({cost: getTripCost(this.#sortedAllPoints, this.#offerPack)}), this.#tripInfoComponent.element);
   }
 
   #renderFilters(container) {
