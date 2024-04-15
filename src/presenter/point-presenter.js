@@ -27,7 +27,7 @@ export default class PointPresenter {
     this.#handleModeChange = onModeChange;
   }
 
-  init(point, destinations, offerPack, typePack) {
+  init({point, destinations, offerPack, typePack}) {
     this.#point = point;
     this.#destinations = destinations;
     this.#offerPack = offerPack;

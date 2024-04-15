@@ -1,14 +1,10 @@
-import { RenderPosition, render } from '../framework/render.js';
+import { render } from '../framework/render.js';
 import { FilterType } from '../const.js';
 import { filterFunction } from '../utils/filter-utils.js';
-import { SortType } from '../const.js';
-import { sortFunction } from '../utils/sort-utils.js';
-import { getTripRouteDestinations, getTripCost } from '../utils/trip-info-utils.js';
 
-import TripInfoView from '../view/trip-info-view.js';
-import TripRouteView from '../view/trip-route-view.js';
-import TripCostView from '../view/trip-cost-view.js';
 import FilterView from '../view/filter-view.js';
+
+import TripInfoPresenter from './trip-info-presenter.js';
 import PointsBoardPresenter from './points-board-presenter.js';
 
 export default class TripPresenter {
@@ -17,7 +13,6 @@ export default class TripPresenter {
 
   #points = [];
   #sourcedPoints = [];
-  #sortedAllPoints = [];
   #filters = [];
   #destinations = [];
   #offerPack = {};
@@ -27,9 +22,9 @@ export default class TripPresenter {
   #tripInfoContainer = null;
   #filterContainer = null;
   #pointsBoardContainer = null;
-  #tripInfoComponent = null;
   #filtersComponent = null;
 
+  #tripInfoPresenter = null;
   #pointsBoardPresenter = null;
 
   constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, pointsModel}) {
@@ -43,7 +38,6 @@ export default class TripPresenter {
   init() {
     this.#filters = [...this.#filtersModel.filters];
     this.#sourcedPoints = [...this.#pointsModel.points];
-    this.#sortedAllPoints = sortFunction[SortType.DAY]([...this.#sourcedPoints]);
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
@@ -75,17 +69,12 @@ export default class TripPresenter {
   };
 
   #renderTripInfo(container) {
-
-    this.#tripInfoComponent = new TripInfoView();
-    render(this.#tripInfoComponent, container, RenderPosition.AFTERBEGIN);
-    render(new TripRouteView({
-      destinationNames: getTripRouteDestinations(this.#sortedAllPoints, this.#destinations),
-      timing: {
-        dateFrom: this.#sortedAllPoints[0].dateFrom,
-        dateTo: this.#sortedAllPoints[this.#sortedAllPoints.length - 1].dateTo,
-      }}),
-    this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
-    render(new TripCostView({cost: getTripCost(this.#sortedAllPoints, this.#offerPack)}), this.#tripInfoComponent.element);
+    this.#tripInfoPresenter = new TripInfoPresenter({container});
+    this.#tripInfoPresenter.init({
+      points: this.#points,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+    });
   }
 
   #renderFilters(container) {
@@ -98,13 +87,13 @@ export default class TripPresenter {
       pointsBoardContainer: this.#pointsBoardContainer,
     });
 
-    this.#pointsBoardPresenter.init(
-      this.#points,
-      this.#destinations,
-      this.#offerPack,
-      this.#typePack,
-      this.#currentFilter
-    );
+    this.#pointsBoardPresenter.init({
+      points: this.#points,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      typePack: this.#typePack,
+      currentFilter: this.#currentFilter
+    });
   }
 
   #renderTripBoard() {
