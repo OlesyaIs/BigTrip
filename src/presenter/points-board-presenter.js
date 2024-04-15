@@ -29,7 +29,7 @@ export default class PointsBoardPresenter {
     this.#pointsBoardContainer = pointsBoardContainer;
   }
 
-  init(points, destinations, offerPack, typePack, currentFilter) {
+  init({points, destinations, offerPack, typePack, currentFilter}) {
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#typePack = typePack;
@@ -83,7 +83,14 @@ export default class PointsBoardPresenter {
 
   #handlePointChange = (updatedPoint) => {
     this.#points = updateItem(this.#points, updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint, this.#destinations, this.#offerPack, this.#typePack);
+    this.#pointPresenters
+      .get(updatedPoint.id)
+      .init({
+        point: updatedPoint,
+        destinations: this.#destinations,
+        offerPack: this.#offerPack,
+        typePack: this.#typePack
+      });
   };
 
   #handleModeChange = () => {
@@ -104,7 +111,12 @@ export default class PointsBoardPresenter {
       onDataChange: this.#handlePointChange,
       onModeChange: this.#handleModeChange,
     });
-    pointPresenter.init(point, this.#destinations, this.#offerPack, this.#typePack);
+    pointPresenter.init({
+      point: point,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      typePack: this.#typePack
+    });
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
