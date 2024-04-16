@@ -15,8 +15,7 @@ export default class PointsBoardPresenter {
   #offerPack = {};
   #typePack = {};
   #currentFilter = null;
-
-  #currentSortType = SortType.DAY;
+  #currentSortType = null;
 
   #pointsBoardContainer = null;
   #sortComponent = null;
@@ -34,7 +33,7 @@ export default class PointsBoardPresenter {
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
-    this.#currentSortType = SortType.DAY;
+    this.#currentSortType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
     this.#defaultSortedPoints = sortFunction[this.#currentSortType]([...points]);
 
     this.#sortPoints(this.#currentSortType);
@@ -59,11 +58,11 @@ export default class PointsBoardPresenter {
 
   #sortPoints = (sortType) => {
     switch (sortType) {
-      case SortType.TIME:
-        this.#points = sortFunction[SortType.TIME]([...this.#defaultSortedPoints]);
+      case SortType.TIME.type:
+        this.#points = sortFunction[SortType.TIME.type]([...this.#defaultSortedPoints]);
         break;
-      case SortType.PRICE:
-        this.#points = sortFunction[SortType.PRICE]([...this.#defaultSortedPoints]);
+      case SortType.PRICE.type:
+        this.#points = sortFunction[SortType.PRICE.type]([...this.#defaultSortedPoints]);
         break;
       default:
         this.#points = [...this.#defaultSortedPoints];

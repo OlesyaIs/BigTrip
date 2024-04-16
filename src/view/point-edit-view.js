@@ -299,7 +299,7 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  #onDateFromChangeHandler = ([userDate]) => {
+  #onDateFromChange = ([userDate]) => {
     const dateTo = this.#datePickerTo.parseDate(this.element.querySelector('#event-end-time-1').value);
     if (userDate > dateTo) {
       this.updateElement({
@@ -314,7 +314,7 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  #onDateToChangeHandler = ([userDate]) => {
+  #onDateToChange = ([userDate]) => {
     this.updateElement({
       dateTo: userDate,
     });
@@ -327,7 +327,7 @@ export default class PointEditView extends AbstractStatefulView {
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
-        onChange: this.#onDateFromChangeHandler,
+        onChange: this.#onDateFromChange,
       }
     );
 
@@ -336,7 +336,7 @@ export default class PointEditView extends AbstractStatefulView {
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
-        onChange: this.#onDateToChangeHandler,
+        onChange: this.#onDateToChange,
         minDate: this.#datePickerFrom.parseDate(this.element.querySelector('#event-start-time-1').value),
       }
     );
