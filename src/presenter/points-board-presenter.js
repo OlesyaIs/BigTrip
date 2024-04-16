@@ -9,6 +9,8 @@ import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 
 export default class PointsBoardPresenter {
+  #sortModel = null;
+
   #points = [];
   #defaultSortedPoints = [];
   #destinations = [];
@@ -24,8 +26,9 @@ export default class PointsBoardPresenter {
 
   #pointPresenters = new Map();
 
-  constructor({pointsBoardContainer}) {
+  constructor({pointsBoardContainer, sortModel}) {
     this.#pointsBoardContainer = pointsBoardContainer;
+    this.#sortModel = sortModel;
   }
 
   init({points, destinations, offerPack, typePack, currentFilter}) {
@@ -33,7 +36,7 @@ export default class PointsBoardPresenter {
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
-    this.#currentSortType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
+    this.#currentSortType = this.#sortModel.defaultType;
     this.#defaultSortedPoints = sortFunction[this.#currentSortType]([...points]);
 
     this.#sortPoints(this.#currentSortType);
