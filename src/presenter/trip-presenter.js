@@ -1,5 +1,4 @@
 import { render } from '../framework/render.js';
-import { FilterType } from '../const.js';
 import { filterFunction } from '../utils/filter-utils.js';
 
 import FilterView from '../view/filter-view.js';
@@ -43,7 +42,7 @@ export default class TripPresenter {
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
-    this.#currentFilter = FilterType.EVERYTHING;
+    this.#currentFilter = this.#filtersModel.defaultFilter;
 
     this.#filterPoints();
     this.#renderTripBoard();
@@ -80,7 +79,7 @@ export default class TripPresenter {
   }
 
   #renderFilters(container) {
-    this.#filtersComponent = new FilterView({filters: this.#filters, onFilterChange: this.#handleFilterChange});
+    this.#filtersComponent = new FilterView({filters: this.#filters, defaultFilter: this.#filtersModel.defaultFilter, onFilterChange: this.#handleFilterChange});
     render(this.#filtersComponent, container);
   }
 
