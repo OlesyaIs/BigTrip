@@ -87,7 +87,7 @@ const createOfferTemplate = (offer, isChecked) => {
 
   return (
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.shortTitle}-1" type="checkbox" name="event-offer-${offer.shortTitle}"${checkedAttribute}>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.shortTitle}-1" type="checkbox" name="event-offer-${offer.shortTitle}" data-offer-id="${offer.id}"${checkedAttribute}>
       <label class="event__offer-label" for="event-offer-${offer.shortTitle}-1">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -178,21 +178,20 @@ export default class PointEditView extends AbstractStatefulView {
   #typePack = null;
   #destinations = null;
   #offerPack = null;
-  #currentPoint = null;
   #handleSubmit = null;
   #handleClick = null;
+  #point = null;
 
   constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
     super();
 
-    this._setState(currentPoint);
-
     this.#typePack = typePack;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
-    this.#currentPoint = currentPoint ? currentPoint : createEmptyPoint(typePack);
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
+    this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
+    this._setState(PointEditView.parsePointToState(this.#point));
 
     this._restoreHandlers();
   }
@@ -201,21 +200,32 @@ export default class PointEditView extends AbstractStatefulView {
     return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state);
   }
 
+  reset(point) {
+    this.updateElement(PointEditView.parsePointToState(point));
+  }
+
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onSubmit);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange);
+
+    const offersGroup = this.element.querySelector('.event__available-offers');
+    if (offersGroup) {
+      offersGroup.addEventListener('change', this.#onOfferClick);
+    }
+
   }
 
   #onSubmit = (evt) => {
     evt.preventDefault();
-    this.#handleSubmit(this.#currentPoint);
+    this.#handleSubmit(PointEditView.parseStateToPoint(this._state));
   };
 
   #onClick = (evt) => {
     evt.preventDefault();
-    this.#handleClick();
+    this.#handleClick(this.#point);
   };
 
   #onTypeChange = (evt) => {
@@ -241,5 +251,29 @@ export default class PointEditView extends AbstractStatefulView {
     }
 
     this.updateElement({destination: newDestination.id});
+  };
+
+  #onOfferClick = (evt) => {
+    evt.preventDefault();
+
+    const checkedOfferComponents = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
+    this._setState({
+      offers: checkedOfferComponents.map((checkedOffer) => checkedOffer.dataset.offerId)
+    });
+  };
+
+  static parsePointToState(point) {
+    return structuredClone(point);
+  }
+
+  static parseStateToPoint(state) {
+    return structuredClone(state);
+  }
+
+  #onPriceChange = (evt) => {
+    evt.preventDefault();
+    this._setState({
+      basePrice: evt.target.value
+    });
   };
 }

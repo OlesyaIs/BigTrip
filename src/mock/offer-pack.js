@@ -1,13 +1,15 @@
+import { nanoid } from 'nanoid';
+
 const OfferPack = {
   TAXI: [
     {
-      id: 0,
+      id: nanoid(),
       shortTitle: 'uber',
       title: 'Order Uber',
       price: 20,
     },
     {
-      id: 1,
+      id: nanoid(),
       shortTitle: 'business',
       title: 'Upgrade to a business class',
       price: 120,
@@ -18,31 +20,31 @@ const OfferPack = {
   SHIP: [],
   FLIGHT: [
     {
-      id: 2,
+      id: nanoid(),
       shortTitle: 'luggage',
       title: 'Add luggage',
       price: 30,
     },
     {
-      id: 3,
+      id: nanoid(),
       shortTitle: 'comfort',
       title: 'Switch to comfort class',
       price: 100,
     },
     {
-      id: 4,
+      id: nanoid(),
       shortTitle: 'meal',
       title: 'Add meal',
       price: 15,
     },
     {
-      id: 5,
+      id: nanoid(),
       shortTitle: 'seats',
       title: 'Choose seats',
       price: 5,
     },
     {
-      id: 6,
+      id: nanoid(),
       shortTitle: 'train',
       title: 'Travel by train',
       price: 40,
@@ -50,7 +52,7 @@ const OfferPack = {
   ],
   DRIVE: [
     {
-      id: 7,
+      id: nanoid(),
       shortTitle: 'rent',
       title: 'Rent a car',
       price: 200,
@@ -58,7 +60,7 @@ const OfferPack = {
   ],
   CHECK_IN: [
     {
-      id: 8,
+      id: nanoid(),
       shortTitle: 'breakfast',
       title: 'Add breakfast',
       price: 50,
@@ -66,13 +68,13 @@ const OfferPack = {
   ],
   SIGHTSEEING: [
     {
-      id: 9,
+      id: nanoid(),
       shortTitle: 'tickets',
       title: 'Book tickets',
       price: 40,
     },
     {
-      id: 10,
+      id: nanoid(),
       shortTitle: 'lunch',
       title: 'Lunch in city',
       price: 30,
