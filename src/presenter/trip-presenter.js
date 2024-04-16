@@ -9,6 +9,7 @@ import PointsBoardPresenter from './points-board-presenter.js';
 
 export default class TripPresenter {
   #filtersModel = null;
+  #sortModel = null;
   #pointsModel = null;
 
   #points = [];
@@ -27,11 +28,12 @@ export default class TripPresenter {
   #tripInfoPresenter = null;
   #pointsBoardPresenter = null;
 
-  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, sortModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#pointsBoardContainer = tripPointsBoardContainer;
     this.#filtersModel = filtersModel;
+    this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
   }
 
@@ -85,6 +87,7 @@ export default class TripPresenter {
   #renderPointsBoard() {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
       pointsBoardContainer: this.#pointsBoardContainer,
+      sortModel: this.#sortModel
     });
 
     this.#pointsBoardPresenter.init({
