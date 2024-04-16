@@ -1,6 +1,5 @@
 import { render, remove } from '../framework/render.js';
 import { updateItem } from '../utils/common-utils.js';
-import { SortType } from '../const.js';
 import { sortFunction } from '../utils/sort-utils.js';
 
 import SortView from '../view/sort-view.js';
@@ -17,6 +16,7 @@ export default class PointsBoardPresenter {
   #offerPack = {};
   #typePack = {};
   #currentFilter = null;
+  #sortTypePack = null;
   #currentSortType = null;
 
   #pointsBoardContainer = null;
@@ -36,6 +36,7 @@ export default class PointsBoardPresenter {
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
+    this.#sortTypePack = this.#sortModel.sortTypePack;
     this.#currentSortType = this.#sortModel.defaultType;
     this.#defaultSortedPoints = sortFunction[this.#currentSortType]([...points]);
 
@@ -61,11 +62,11 @@ export default class PointsBoardPresenter {
 
   #sortPoints = (sortType) => {
     switch (sortType) {
-      case SortType.TIME.type:
-        this.#points = sortFunction[SortType.TIME.type]([...this.#defaultSortedPoints]);
+      case this.#sortTypePack.TIME.type:
+        this.#points = sortFunction[this.#sortTypePack.TIME.type]([...this.#defaultSortedPoints]);
         break;
-      case SortType.PRICE.type:
-        this.#points = sortFunction[SortType.PRICE.type]([...this.#defaultSortedPoints]);
+      case this.#sortTypePack.PRICE.type:
+        this.#points = sortFunction[this.#sortTypePack.PRICE.type]([...this.#defaultSortedPoints]);
         break;
       default:
         this.#points = [...this.#defaultSortedPoints];

@@ -1,11 +1,11 @@
 import { SortType } from '../const';
 
 export default class SortModel {
-  #sortPack = structuredClone(SortType);
+  #sortTypePack = structuredClone(SortType);
   #defaultType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
 
-  get sortPack() {
-    return this.#sortPack;
+  get sortTypePack() {
+    return this.#sortTypePack;
   }
 
   get defaultType() {
