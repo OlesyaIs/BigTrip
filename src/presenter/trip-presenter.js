@@ -1,9 +1,10 @@
-import { RenderPosition, render } from '../framework/render.js';
+import { render } from '../framework/render.js';
 import { FilterType } from '../const.js';
 import { filterFunction } from '../utils/filter-utils.js';
 
-import TripInfoView from '../view/trip-info-view.js';
 import FilterView from '../view/filter-view.js';
+
+import TripInfoPresenter from './trip-info-presenter.js';
 import PointsBoardPresenter from './points-board-presenter.js';
 
 export default class TripPresenter {
@@ -23,6 +24,7 @@ export default class TripPresenter {
   #pointsBoardContainer = null;
   #filtersComponent = null;
 
+  #tripInfoPresenter = null;
   #pointsBoardPresenter = null;
 
   constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, pointsModel}) {
@@ -67,7 +69,12 @@ export default class TripPresenter {
   };
 
   #renderTripInfo(container) {
-    render(new TripInfoView(), container, RenderPosition.AFTERBEGIN);
+    this.#tripInfoPresenter = new TripInfoPresenter({container});
+    this.#tripInfoPresenter.init({
+      points: this.#points,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+    });
   }
 
   #renderFilters(container) {
@@ -80,13 +87,13 @@ export default class TripPresenter {
       pointsBoardContainer: this.#pointsBoardContainer,
     });
 
-    this.#pointsBoardPresenter.init(
-      this.#points,
-      this.#destinations,
-      this.#offerPack,
-      this.#typePack,
-      this.#currentFilter
-    );
+    this.#pointsBoardPresenter.init({
+      points: this.#points,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      typePack: this.#typePack,
+      currentFilter: this.#currentFilter
+    });
   }
 
   #renderTripBoard() {
