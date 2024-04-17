@@ -19,13 +19,25 @@ const createFilterListTemplate = (filters) =>
 
 export default class FilterView extends AbstractView {
   #filters = null;
+  #handleFilterChange = null;
 
-  constructor({filters}) {
+  constructor({filters, onFilterChange}) {
     super();
     this.#filters = filters;
+    this.#handleFilterChange = onFilterChange;
+    this.element.addEventListener('change', this.#onFilterChange);
   }
 
   get template() {
     return createFilterListTemplate(this.#filters);
   }
+
+  #onFilterChange = (evt) => {
+    if (!evt.target.value) {
+      return;
+    }
+
+    evt.preventDefault();
+    this.#handleFilterChange(evt.target.value);
+  };
 }
