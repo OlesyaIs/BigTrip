@@ -1,6 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
+import { FLATPICKR_DATE_FORMAT } from '../const.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -326,7 +327,7 @@ export default class PointEditView extends AbstractStatefulView {
       this.element.querySelector('#event-start-time-1'),
       {
         enableTime: true,
-        dateFormat: 'd/m/y H:i',
+        dateFormat: FLATPICKR_DATE_FORMAT,
         onChange: this.#onDateFromChange,
       }
     );
@@ -335,7 +336,7 @@ export default class PointEditView extends AbstractStatefulView {
       this.element.querySelector('#event-end-time-1'),
       {
         enableTime: true,
-        dateFormat: 'd/m/y H:i',
+        dateFormat: FLATPICKR_DATE_FORMAT,
         onChange: this.#onDateToChange,
         minDate: this.#datePickerFrom.parseDate(this.element.querySelector('#event-start-time-1').value),
       }

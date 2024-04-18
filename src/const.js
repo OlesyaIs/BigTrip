@@ -57,4 +57,6 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode };
+const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
+
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT };
