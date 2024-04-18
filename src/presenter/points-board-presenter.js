@@ -1,6 +1,5 @@
 import { render, remove } from '../framework/render.js';
 import { updateItem } from '../utils/common-utils.js';
-import { SortType } from '../const.js';
 import { sortFunction } from '../utils/sort-utils.js';
 
 import SortView from '../view/sort-view.js';
@@ -9,14 +8,16 @@ import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 
 export default class PointsBoardPresenter {
+  #sortModel = null;
+
   #points = [];
   #defaultSortedPoints = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
   #currentFilter = null;
-
-  #currentSortType = SortType.DAY;
+  #sortTypePack = null;
+  #currentSortType = null;
 
   #pointsBoardContainer = null;
   #sortComponent = null;
@@ -25,8 +26,9 @@ export default class PointsBoardPresenter {
 
   #pointPresenters = new Map();
 
-  constructor({pointsBoardContainer}) {
+  constructor({pointsBoardContainer, sortModel}) {
     this.#pointsBoardContainer = pointsBoardContainer;
+    this.#sortModel = sortModel;
   }
 
   init({points, destinations, offerPack, typePack, currentFilter}) {
@@ -34,7 +36,8 @@ export default class PointsBoardPresenter {
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
-    this.#currentSortType = SortType.DAY;
+    this.#sortTypePack = this.#sortModel.sortTypePack;
+    this.#currentSortType = this.#sortModel.defaultType;
     this.#defaultSortedPoints = sortFunction[this.#currentSortType]([...points]);
 
     this.#sortPoints(this.#currentSortType);
@@ -59,11 +62,11 @@ export default class PointsBoardPresenter {
 
   #sortPoints = (sortType) => {
     switch (sortType) {
-      case SortType.TIME:
-        this.#points = sortFunction[SortType.TIME]([...this.#defaultSortedPoints]);
+      case this.#sortTypePack.TIME.type:
+        this.#points = sortFunction[this.#sortTypePack.TIME.type]([...this.#defaultSortedPoints]);
         break;
-      case SortType.PRICE:
-        this.#points = sortFunction[SortType.PRICE]([...this.#defaultSortedPoints]);
+      case this.#sortTypePack.PRICE.type:
+        this.#points = sortFunction[this.#sortTypePack.PRICE.type]([...this.#defaultSortedPoints]);
         break;
       default:
         this.#points = [...this.#defaultSortedPoints];

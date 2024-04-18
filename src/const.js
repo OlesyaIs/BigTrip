@@ -13,11 +13,36 @@ const FilterType = {
 };
 
 const SortType = {
-  DAY: 'day',
-  EVENT: 'event',
-  TIME: 'time',
-  PRICE: 'price',
-  OFFER: 'offer',
+  DAY: {
+    type: 'day',
+    title: 'Day',
+    isDefault: true,
+    isDisabled: false,
+  },
+  EVENT: {
+    type: 'event',
+    title: 'Event',
+    isDefault: false,
+    isDisabled: true,
+  },
+  TIME: {
+    type: 'time',
+    title: 'Time',
+    isDefault: false,
+    isDisabled: false,
+  },
+  PRICE: {
+    type: 'price',
+    title: 'Price',
+    isDefault: false,
+    isDisabled: false,
+  },
+  OFFER: {
+    type: 'offer',
+    title: 'Offers',
+    isDefault: false,
+    isDisabled: true,
+  }
 };
 
 const EmptyListMessage = {
@@ -32,4 +57,6 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode };
+const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
+
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT };

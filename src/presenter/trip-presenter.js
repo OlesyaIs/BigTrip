@@ -1,5 +1,4 @@
 import { render } from '../framework/render.js';
-import { FilterType } from '../const.js';
 import { filterFunction } from '../utils/filter-utils.js';
 
 import FilterView from '../view/filter-view.js';
@@ -9,6 +8,7 @@ import PointsBoardPresenter from './points-board-presenter.js';
 
 export default class TripPresenter {
   #filtersModel = null;
+  #sortModel = null;
   #pointsModel = null;
 
   #points = [];
@@ -27,11 +27,12 @@ export default class TripPresenter {
   #tripInfoPresenter = null;
   #pointsBoardPresenter = null;
 
-  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, sortModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#pointsBoardContainer = tripPointsBoardContainer;
     this.#filtersModel = filtersModel;
+    this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
   }
 
@@ -41,7 +42,7 @@ export default class TripPresenter {
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
-    this.#currentFilter = FilterType.EVERYTHING;
+    this.#currentFilter = this.#filtersModel.defaultFilter;
 
     this.#filterPoints();
     this.#renderTripBoard();
@@ -78,13 +79,14 @@ export default class TripPresenter {
   }
 
   #renderFilters(container) {
-    this.#filtersComponent = new FilterView({filters: this.#filters, onFilterChange: this.#handleFilterChange});
+    this.#filtersComponent = new FilterView({filters: this.#filters, defaultFilter: this.#filtersModel.defaultFilter, onFilterChange: this.#handleFilterChange});
     render(this.#filtersComponent, container);
   }
 
   #renderPointsBoard() {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
       pointsBoardContainer: this.#pointsBoardContainer,
+      sortModel: this.#sortModel
     });
 
     this.#pointsBoardPresenter.init({

@@ -22,7 +22,7 @@ export default class TripInfoPresenter {
   }
 
   init({points, destinations, offerPack}) {
-    this.#sortedPoints = sortFunction[SortType.DAY]([...points]);
+    this.#sortedPoints = sortFunction[SortType.DAY.type]([...points]);
     this.#destinations = destinations;
     this.#offerPack = offerPack;
 
