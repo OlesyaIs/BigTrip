@@ -21,7 +21,7 @@ export default class TripInfoPresenter {
     this.#tripInfoContainer = container;
   }
 
-  init({points, destinations, offerPack}) {
+  init({points, destinations = this.#destinations, offerPack = this.#offerPack}) {
     this.#sortedPoints = sortFunction[SortType.DAY.type]([...points]);
     this.#destinations = destinations;
     this.#offerPack = offerPack;
@@ -48,11 +48,11 @@ export default class TripInfoPresenter {
       return;
     }
 
-    if (this.#tripInfoComponent.element.contains(previousRouteComponent)) {
+    if (this.#tripInfoComponent.element.contains(previousRouteComponent.element)) {
       replace(this.#tripRouteComponent, previousRouteComponent);
     }
 
-    if (this.#tripInfoComponent.element.contains(previousCostComponent)) {
+    if (this.#tripInfoComponent.element.contains(previousCostComponent.element)) {
       replace(this.#tripCostComponent, previousCostComponent);
     }
   }

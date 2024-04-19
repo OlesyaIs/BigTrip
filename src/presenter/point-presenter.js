@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
 import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
-import { Mode } from '../const.js';
+import { Mode, UserAction, UpdateType } from '../const.js';
 
 import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
@@ -27,7 +27,12 @@ export default class PointPresenter {
     this.#handleModeChange = onModeChange;
   }
 
-  init({point, destinations, offerPack, typePack}) {
+  init({
+    point,
+    destinations = this.#destinations,
+    offerPack = this.#offerPack,
+    typePack = this.#typePack
+  }) {
     this.#point = point;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
@@ -112,7 +117,11 @@ export default class PointPresenter {
   };
 
   #handleEditFormSubmit = (point) => {
-    this.#handleDataChange(point);
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MAJOR_MAJOR,
+      point
+    );
     this.#replaceEditFormToPoint();
   };
 
@@ -122,6 +131,10 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,
+      {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
   };
 }

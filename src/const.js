@@ -59,4 +59,19 @@ const Mode = {
 
 const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT };
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR_MINOR: 'MINOR_MINOR',
+  MAJOR_MINOR: 'MAJOR_MINOR',
+  MINOR_MAJOR: 'MINOR_MAJOR',
+  MAJOR_MAJOR: 'MAJOR_MAJOR',
+  FULL: 'FULL',
+};
+
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT, UserAction, UpdateType };

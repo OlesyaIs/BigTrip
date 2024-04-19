@@ -1,6 +1,7 @@
 import { render, remove } from '../framework/render.js';
-import { updateItem } from '../utils/common-utils.js';
+// import { updateItem } from '../utils/common-utils.js';
 import { sortFunction } from '../utils/sort-utils.js';
+import { UpdateType } from '../const.js';
 
 import SortView from '../view/sort-view.js';
 import PointsListView from '../view/points-list-view.js';
@@ -8,6 +9,7 @@ import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 
 export default class PointsBoardPresenter {
+  #pointsModel = null;
   #sortModel = null;
 
   #points = [];
@@ -17,7 +19,6 @@ export default class PointsBoardPresenter {
   #typePack = {};
   #currentFilter = null;
   #sortTypePack = null;
-  #currentSortType = null;
 
   #pointsBoardContainer = null;
   #sortComponent = null;
@@ -26,23 +27,38 @@ export default class PointsBoardPresenter {
 
   #pointPresenters = new Map();
 
-  constructor({pointsBoardContainer, sortModel}) {
+  #handleDataChange = null;
+
+  constructor({pointsBoardContainer, sortModel, pointsModel}) {
     this.#pointsBoardContainer = pointsBoardContainer;
+    this.#pointsModel = pointsModel;
     this.#sortModel = sortModel;
+
+    this.#pointsModel.addObserver(this.#handlePointsModelEvent);
   }
 
-  init({points, destinations, offerPack, typePack, currentFilter}) {
+  init({
+    points,
+    destinations,
+    offerPack,
+    typePack,
+    currentFilter,
+    onDataChange,
+    currentSortType
+  }) {
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
     this.#sortTypePack = this.#sortModel.sortTypePack;
-    this.#currentSortType = this.#sortModel.defaultType;
-    this.#defaultSortedPoints = sortFunction[this.#currentSortType]([...points]);
+    this.#sortModel.currentType = currentSortType;
+    this.#defaultSortedPoints = sortFunction[this.#sortModel.currentType]([...points]);
 
-    this.#sortPoints(this.#currentSortType);
+    this.#handleDataChange = onDataChange;
 
-    this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
+    this.#sortPoints(this.#sortModel.currentType);
+
+    this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange, currentType: this.#sortModel.currentType});
     this.#pointsListComponent = new PointsListView();
     this.#emptyListMessageComponent = new EmptyListMessageView({currentFilter: this.#currentFilter});
 
@@ -73,28 +89,46 @@ export default class PointsBoardPresenter {
     }
   };
 
+  #handlePointsModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#pointPresenters.get(data.id).init({point: data});
+        break;
+
+      case UpdateType.MINOR_MINOR:
+        this.#clearPointsList();
+        this.#renderPointList();
+        break;
+
+      case UpdateType.MAJOR_MINOR:
+        this.#clearPointsList();
+        this.#renderPointList();
+        break;
+    }
+  };
+
   #handleSortTypeChange = (sortType) => {
-    if (sortType === this.#currentSortType) {
+    if (sortType === this.#sortModel.currentType) {
       return;
     }
 
+    this.#sortModel.currentType = sortType;
     this.#sortPoints(sortType);
     this.#clearPointsList();
     this.#renderPointList();
-    this.#currentSortType = sortType;
   };
 
-  #handlePointChange = (updatedPoint) => {
-    this.#points = updateItem(this.#points, updatedPoint);
-    this.#pointPresenters
-      .get(updatedPoint.id)
-      .init({
-        point: updatedPoint,
-        destinations: this.#destinations,
-        offerPack: this.#offerPack,
-        typePack: this.#typePack
-      });
-  };
+  // #handlePointChange = (updatedPoint) => {
+  //   this.#points = updateItem(this.#points, updatedPoint);
+  //   this.#pointPresenters
+  //     .get(updatedPoint.id)
+  //     .init({
+  //       point: updatedPoint,
+  //       destinations: this.#destinations,
+  //       offerPack: this.#offerPack,
+  //       typePack: this.#typePack
+  //     });
+  // };
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
@@ -111,7 +145,7 @@ export default class PointsBoardPresenter {
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointsListComponent.element,
-      onDataChange: this.#handlePointChange,
+      onDataChange: this.#handleDataChange,
       onModeChange: this.#handleModeChange,
     });
     pointPresenter.init({

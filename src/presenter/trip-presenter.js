@@ -1,5 +1,6 @@
 import { render } from '../framework/render.js';
 import { filterFunction } from '../utils/filter-utils.js';
+import { UserAction, UpdateType } from '../const.js';
 
 import FilterView from '../view/filter-view.js';
 
@@ -11,8 +12,6 @@ export default class TripPresenter {
   #sortModel = null;
   #pointsModel = null;
 
-  #points = [];
-  #sourcedPoints = [];
   #filters = [];
   #destinations = [];
   #offerPack = {};
@@ -34,17 +33,25 @@ export default class TripPresenter {
     this.#filtersModel = filtersModel;
     this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
+
+    this.#pointsModel.addObserver(this.#handlePointsModelEvent);
+  }
+
+  get points() {
+    return [...this.#pointsModel.points];
+  }
+
+  get filteredPoints() {
+    return filterFunction[this.#currentFilter](this.points);
   }
 
   init() {
     this.#filters = [...this.#filtersModel.filters];
-    this.#sourcedPoints = [...this.#pointsModel.points];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
     this.#currentFilter = this.#filtersModel.defaultFilter;
 
-    this.#filterPoints();
     this.#renderTripBoard();
   }
 
@@ -53,6 +60,41 @@ export default class TripPresenter {
     this.#pointsBoardPresenter = null;
   }
 
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_POINT:
+        this.#pointsModel.updatePoint(updateType, update);
+        break;
+
+      case UserAction.ADD_POINT:
+        this.#pointsModel.addPoint(updateType, update);
+        break;
+
+      case UserAction.DELETE_POINT:
+        this.#pointsModel.deletePoint(updateType, update);
+        break;
+    }
+  };
+
+  #handlePointsModelEvent = (updateType) => {
+    switch (updateType) {
+      case UpdateType.MAJOR_MINOR:
+        this.#tripInfoPresenter.init({points: this.points});
+        break;
+
+      case UpdateType.MINOR_MAJOR:
+        this.#clearPointsBoard();
+        this.#renderPointsBoard(this.#sortModel.currentType);
+        break;
+
+      case UpdateType.MAJOR_MAJOR:
+        this.#clearPointsBoard();
+        this.#renderPointsBoard(this.#sortModel.currentType);
+        this.#tripInfoPresenter.init({points: this.points});
+        break;
+    }
+  };
+
   #handleFilterChange = (newFilter) => {
     if (newFilter === this.#currentFilter) {
       return;
@@ -60,19 +102,18 @@ export default class TripPresenter {
 
     this.#currentFilter = newFilter;
 
-    this.#filterPoints();
     this.#clearPointsBoard();
     this.#renderPointsBoard();
   };
 
-  #filterPoints = () => {
-    this.#points = filterFunction[this.#currentFilter](this.#sourcedPoints);
-  };
+  // #handleSortTypeChange = (newSortType) => {
+
+  // };
 
   #renderTripInfo(container) {
     this.#tripInfoPresenter = new TripInfoPresenter({container});
     this.#tripInfoPresenter.init({
-      points: this.#points,
+      points: this.points,
       destinations: this.#destinations,
       offerPack: this.#offerPack,
     });
@@ -83,18 +124,21 @@ export default class TripPresenter {
     render(this.#filtersComponent, container);
   }
 
-  #renderPointsBoard() {
+  #renderPointsBoard(currentSortType = this.#sortModel.defaultType) {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
       pointsBoardContainer: this.#pointsBoardContainer,
+      pointsModel: this.#pointsModel,
       sortModel: this.#sortModel
     });
 
     this.#pointsBoardPresenter.init({
-      points: this.#points,
+      points: this.filteredPoints,
       destinations: this.#destinations,
       offerPack: this.#offerPack,
       typePack: this.#typePack,
-      currentFilter: this.#currentFilter
+      currentFilter: this.#currentFilter,
+      onDataChange: this.#handleViewAction,
+      currentSortType
     });
   }
 

@@ -9,6 +9,10 @@ export default class FiltersModel {
     return this.#filters;
   }
 
+  set filters(newFilterPack) {
+    this.#filterPack = newFilterPack;
+  }
+
   get defaultFilter() {
     return this.#defaultFilter;
   }
