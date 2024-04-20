@@ -66,12 +66,10 @@ const UserAction = {
 };
 
 const UpdateType = {
-  PATCH: 'PATCH',
-  MINOR_MINOR: 'MINOR_MINOR',
-  MAJOR_MINOR: 'MAJOR_MINOR',
-  MINOR_MAJOR: 'MINOR_MAJOR',
-  MAJOR_MAJOR: 'MAJOR_MAJOR',
-  FULL: 'FULL',
+  POINT: 'POINT',
+  BOARD: 'BOARD',
+  BOARD_WITH_INFO: 'BOARD_WITH_INFO',
+  FILTERS_WITH_BOARD: 'FILTERS_WITH_BOARD',
 };
 
 export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT, UserAction, UpdateType };

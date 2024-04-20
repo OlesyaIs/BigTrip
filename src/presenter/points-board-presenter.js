@@ -1,5 +1,4 @@
 import { render, remove } from '../framework/render.js';
-// import { updateItem } from '../utils/common-utils.js';
 import { sortFunction } from '../utils/sort-utils.js';
 import { UpdateType } from '../const.js';
 
@@ -34,38 +33,56 @@ export default class PointsBoardPresenter {
     this.#pointsModel = pointsModel;
     this.#sortModel = sortModel;
 
+    this.#sortModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
+  }
+
+  get currentSortType() {
+    return this.#sortModel.currentSortType;
   }
 
   init({
     points,
-    destinations,
-    offerPack,
-    typePack,
-    currentFilter,
-    onDataChange,
-    currentSortType
+    destinations = this.#destinations,
+    offerPack = this.#offerPack,
+    typePack = this.#typePack,
+    currentFilter = this.#currentFilter,
+    onDataChange = this.#handleDataChange,
   }) {
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#typePack = typePack;
     this.#currentFilter = currentFilter;
     this.#sortTypePack = this.#sortModel.sortTypePack;
-    this.#sortModel.currentSortType = currentSortType;
-    this.#defaultSortedPoints = sortFunction[this.#sortModel.currentSortType]([...points]);
+    this.#defaultSortedPoints = sortFunction[this.#sortModel.defaultSortType]([...points]);
+    this.#points = [...this.#defaultSortedPoints];
 
     this.#handleDataChange = onDataChange;
 
     this.#sortPoints(this.#sortModel.currentSortType);
 
+    const previousSortComponent = this.#sortComponent;
+    const previousPointListComponent = this.#pointsListComponent;
+    const previousEmptyListComponent = this.#emptyListMessageComponent;
+
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange, currentSortType: this.#sortModel.currentSortType});
     this.#pointsListComponent = new PointsListView();
     this.#emptyListMessageComponent = new EmptyListMessageView({currentFilter: this.#currentFilter});
 
+    if (!previousSortComponent || !previousPointListComponent || !previousEmptyListComponent) {
+      this.#renderPointsBoard();
+      return;
+    }
+
+    this.#clearPointsList();
+    remove(previousSortComponent);
+    remove(previousPointListComponent);
+    remove(previousEmptyListComponent);
     this.#renderPointsBoard();
   }
 
   destroy() {
+    this.#clearPointsList();
     remove(this.#sortComponent);
     remove(this.#pointsListComponent);
     remove(this.#emptyListMessageComponent);
@@ -76,13 +93,13 @@ export default class PointsBoardPresenter {
     this.#pointPresenters.clear();
   }
 
-  #sortPoints = (sortType) => {
-    switch (sortType) {
+  #sortPoints = () => {
+    switch (this.currentSortType) {
       case this.#sortTypePack.TIME.type:
-        this.#points = sortFunction[this.#sortTypePack.TIME.type]([...this.#defaultSortedPoints]);
+        this.#points = sortFunction[this.#sortTypePack.TIME.type](this.#points);
         break;
       case this.#sortTypePack.PRICE.type:
-        this.#points = sortFunction[this.#sortTypePack.PRICE.type]([...this.#defaultSortedPoints]);
+        this.#points = sortFunction[this.#sortTypePack.PRICE.type](this.#points);
         break;
       default:
         this.#points = [...this.#defaultSortedPoints];
@@ -90,21 +107,11 @@ export default class PointsBoardPresenter {
   };
 
   #handleModelEvent = (updateType, data) => {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#pointPresenters.get(data.id).init({point: data});
-        break;
-
-      case UpdateType.MINOR_MINOR:
-        this.#clearPointsList();
-        this.#renderPointList();
-        break;
-
-      case UpdateType.MAJOR_MINOR:
-        this.#clearPointsList();
-        this.#renderPointList();
-        break;
+    if (updateType !== UpdateType.POINT) {
+      return;
     }
+
+    this.#pointPresenters.get(data.id).init({point: data});
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -112,10 +119,7 @@ export default class PointsBoardPresenter {
       return;
     }
 
-    this.#sortModel.currentSortType = sortType;
-    this.#sortPoints(sortType);
-    this.#clearPointsList();
-    this.#renderPointList();
+    this.#sortModel.setCurrentSortType(UpdateType.BOARD, sortType);
   };
 
   #handleModeChange = () => {

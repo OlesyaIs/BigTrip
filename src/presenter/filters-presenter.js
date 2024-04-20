@@ -38,7 +38,7 @@ export default class FiltersPresenter {
       return;
     }
 
-    if (this.#filtersContainer.element.contains(previousFiltersComponent)) {
+    if (this.#filtersContainer.contains(previousFiltersComponent.element)) {
       replace(this.#filtersComponent, previousFiltersComponent);
     }
   }
@@ -53,6 +53,6 @@ export default class FiltersPresenter {
     }
 
     this.#onFilterTypeChange();
-    this.#filtersModel.setCurrentFilter(UpdateType.FULL, newFilter);
+    this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, newFilter);
   };
 }

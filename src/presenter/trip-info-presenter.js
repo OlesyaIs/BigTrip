@@ -27,8 +27,8 @@ export default class TripInfoPresenter {
     this.#offerPack = offerPack;
 
     const previousInfoComponent = this.#tripInfoComponent;
-    const previousRouteComponent = this.#tripRouteComponent;
-    const previousCostComponent = this.#tripCostComponent;
+
+    this.#tripInfoComponent = new TripInfoView();
 
     this.#tripRouteComponent = new TripRouteView({
       destinationNames: getTripRouteDestinations(this.#sortedPoints, this.#destinations),
@@ -41,19 +41,16 @@ export default class TripInfoPresenter {
     this.#tripCostComponent = new TripCostView({cost: getTripCost(this.#sortedPoints, this.#offerPack)});
 
     if (!previousInfoComponent) {
-      this.#tripInfoComponent = new TripInfoView();
       render(this.#tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
       render(this.#tripRouteComponent, this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
       render(this.#tripCostComponent, this.#tripInfoComponent.element);
       return;
     }
 
-    if (this.#tripInfoComponent.element.contains(previousRouteComponent.element)) {
-      replace(this.#tripRouteComponent, previousRouteComponent);
-    }
-
-    if (this.#tripInfoComponent.element.contains(previousCostComponent.element)) {
-      replace(this.#tripCostComponent, previousCostComponent);
+    if (this.#tripInfoContainer.contains(previousInfoComponent.element)) {
+      replace(this.#tripInfoComponent, previousInfoComponent);
+      render(this.#tripRouteComponent, this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
+      render(this.#tripCostComponent, this.#tripInfoComponent.element);
     }
   }
 

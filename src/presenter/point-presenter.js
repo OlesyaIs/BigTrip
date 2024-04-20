@@ -79,9 +79,9 @@ export default class PointPresenter {
   }
 
   destroy() {
-    remove(this.#pointItemComponent);
     remove(this.#pointComponent);
     remove(this.#pointEditComponent);
+    remove(this.#pointItemComponent);
   }
 
   resetView() {
@@ -119,7 +119,7 @@ export default class PointPresenter {
   #handleEditFormSubmit = (point) => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      UpdateType.FULL,
+      UpdateType.BOARD_WITH_INFO,
       point
     );
     this.#replaceEditFormToPoint();
@@ -133,7 +133,7 @@ export default class PointPresenter {
   #handleFavoriteClick = () => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      UpdateType.PATCH,
+      UpdateType.POINT,
       {...this.#point, isFavorite: !this.#point.isFavorite}
     );
   };

@@ -1,9 +1,10 @@
 import { SortType } from '../const';
+import Observable from '../framework/observable';
 
-export default class SortModel {
+export default class SortModel extends Observable {
   #sortTypePack = structuredClone(SortType);
   #defaultSortType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
-  #currentSortType = null;
+  #currentSortType = this.#defaultSortType;
 
   get sortTypePack() {
     return this.#sortTypePack;
@@ -21,11 +22,12 @@ export default class SortModel {
     return this.#currentSortType;
   }
 
-  set currentSortType(newType) {
-    if (!this.#sortTypePack[newType.toUpperCase()]) {
-      throw new Error('Can\'t set unknown sort type');
-    }
+  set currentSortType(newSortType) {
+    this.#currentSortType = newSortType;
+  }
 
-    this.#currentSortType = newType;
+  setCurrentSortType(updateType, newSortType) {
+    this.#currentSortType = newSortType;
+    this._notify(updateType, newSortType);
   }
 }

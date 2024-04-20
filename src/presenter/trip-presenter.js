@@ -32,6 +32,7 @@ export default class TripPresenter {
     this.#pointsModel = pointsModel;
 
     this.#filtersModel.addObserver(this.#handleModelEvent);
+    this.#sortModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
 
@@ -70,27 +71,6 @@ export default class TripPresenter {
     this.#renderTripBoard();
   }
 
-  destroy() {
-    this.#clearTripInfo();
-    this.#clearFilters();
-    this.#clearPointsBoard();
-  }
-
-  #clearTripInfo() {
-    this.#tripInfoPresenter.destroy();
-    this.#tripInfoPresenter = null;
-  }
-
-  #clearFilters() {
-    this.#filtersPresenter.destroy();
-    this.#filtersPresenter = null;
-  }
-
-  #clearPointsBoard() {
-    this.#pointsBoardPresenter.destroy();
-    this.#pointsBoardPresenter = null;
-  }
-
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
@@ -109,24 +89,25 @@ export default class TripPresenter {
 
   #handleModelEvent = (updateType) => {
     switch (updateType) {
-      case UpdateType.MAJOR_MINOR:
+      case UpdateType.BOARD:
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
+        break;
+
+      case UpdateType.BOARD_WITH_INFO:
         this.#tripInfoPresenter.init({points: this.points});
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
         break;
 
-      case UpdateType.MINOR_MAJOR:
-        this.#clearPointsBoard();
-        this.#renderPointsBoard(this.#sortModel.currentType);
-        break;
-
-      case UpdateType.MAJOR_MAJOR:
-        this.#clearPointsBoard();
-        this.#renderPointsBoard(this.#sortModel.currentType);
-        this.#tripInfoPresenter.init({points: this.points});
-        break;
-
-      case UpdateType.FULL:
-        this.destroy();
-        this.#renderTripBoard();
+      case UpdateType.FILTERS_WITH_BOARD:
+        this.#filtersPresenter.init();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints,
+          currentFilter: this.currentFilter
+        });
     }
   };
 
@@ -153,7 +134,7 @@ export default class TripPresenter {
     this.#filtersPresenter.init();
   }
 
-  #renderPointsBoard(container, currentSortType = this.#sortModel.defaultSortType) {
+  #renderPointsBoard(container) {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
       pointsBoardContainer: container,
       pointsModel: this.#pointsModel,
@@ -166,8 +147,7 @@ export default class TripPresenter {
       offerPack: this.#offerPack,
       typePack: this.#typePack,
       currentFilter: this.currentFilter,
-      onDataChange: this.#handleViewAction,
-      currentSortType
+      onDataChange: this.#handleViewAction
     });
   }
 
