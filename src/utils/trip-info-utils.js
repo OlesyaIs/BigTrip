@@ -18,7 +18,7 @@ const getTripRouteDestinations = (sortedPoints, allDestinations) => {
 const getTripCost = (points, offerPack) => {
   let sum = 0;
   points.forEach((point) => {
-    sum += point.basePrice;
+    sum += parseInt(point.basePrice, 10);
     const offersPack = offerPack[formatToScreamingSnakeCase(point.type)];
     point.offers.forEach((currentOfferId) => {
       const currentOffer = offersPack.find((offer) => currentOfferId === offer.id);

@@ -1,40 +1,58 @@
-import { render } from '../framework/render.js';
 import { filterFunction } from '../utils/filter-utils.js';
 import { UserAction, UpdateType } from '../const.js';
 
-import FilterView from '../view/filter-view.js';
-
 import TripInfoPresenter from './trip-info-presenter.js';
 import PointsBoardPresenter from './points-board-presenter.js';
+import FiltersPresenter from './filters-presenter.js';
 
 export default class TripPresenter {
   #filtersModel = null;
   #sortModel = null;
   #pointsModel = null;
 
-  #filters = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
-  #currentFilter = null;
 
   #tripInfoContainer = null;
   #filterContainer = null;
   #pointsBoardContainer = null;
-  #filtersComponent = null;
 
   #tripInfoPresenter = null;
+  #filtersPresenter = null;
   #pointsBoardPresenter = null;
 
   constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, sortModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#pointsBoardContainer = tripPointsBoardContainer;
+
     this.#filtersModel = filtersModel;
     this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
 
-    this.#pointsModel.addObserver(this.#handlePointsModelEvent);
+    this.#filtersModel.addObserver(this.#handleModelEvent);
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+  }
+
+  get filters() {
+    return [...this.#filtersModel.filters];
+  }
+
+  get currentFilter() {
+    return this.#filtersModel.currentFilter;
+  }
+
+  get defaultSortType() {
+    return this.#sortModel.defaultSortType;
+  }
+
+  get currentSortType() {
+    return this.#sortModel.currentSortType;
+  }
+
+  set currentSortType(newSortType) {
+    this.#sortModel.currentSortType = newSortType;
   }
 
   get points() {
@@ -42,17 +60,30 @@ export default class TripPresenter {
   }
 
   get filteredPoints() {
-    return filterFunction[this.#currentFilter](this.points);
+    return filterFunction[this.currentFilter](this.points);
   }
 
   init() {
-    this.#filters = [...this.#filtersModel.filters];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
-    this.#currentFilter = this.#filtersModel.defaultFilter;
-
     this.#renderTripBoard();
+  }
+
+  destroy() {
+    this.#clearTripInfo();
+    this.#clearFilters();
+    this.#clearPointsBoard();
+  }
+
+  #clearTripInfo() {
+    this.#tripInfoPresenter.destroy();
+    this.#tripInfoPresenter = null;
+  }
+
+  #clearFilters() {
+    this.#filtersPresenter.destroy();
+    this.#filtersPresenter = null;
   }
 
   #clearPointsBoard() {
@@ -76,7 +107,7 @@ export default class TripPresenter {
     }
   };
 
-  #handlePointsModelEvent = (updateType) => {
+  #handleModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.MAJOR_MINOR:
         this.#tripInfoPresenter.init({points: this.points});
@@ -92,23 +123,16 @@ export default class TripPresenter {
         this.#renderPointsBoard(this.#sortModel.currentType);
         this.#tripInfoPresenter.init({points: this.points});
         break;
+
+      case UpdateType.FULL:
+        this.destroy();
+        this.#renderTripBoard();
     }
   };
 
-  #handleFilterChange = (newFilter) => {
-    if (newFilter === this.#currentFilter) {
-      return;
-    }
-
-    this.#currentFilter = newFilter;
-
-    this.#clearPointsBoard();
-    this.#renderPointsBoard();
+  #handleFilterChange = () => {
+    this.currentSortType = this.defaultSortType;
   };
-
-  // #handleSortTypeChange = (newSortType) => {
-
-  // };
 
   #renderTripInfo(container) {
     this.#tripInfoPresenter = new TripInfoPresenter({container});
@@ -120,13 +144,18 @@ export default class TripPresenter {
   }
 
   #renderFilters(container) {
-    this.#filtersComponent = new FilterView({filters: this.#filters, defaultFilter: this.#filtersModel.defaultFilter, onFilterChange: this.#handleFilterChange});
-    render(this.#filtersComponent, container);
+    this.#filtersPresenter = new FiltersPresenter({
+      filtersModel: this.#filtersModel,
+      filtersContainer: container,
+      onFilterChange: this.#handleFilterChange,
+    });
+
+    this.#filtersPresenter.init();
   }
 
-  #renderPointsBoard(currentSortType = this.#sortModel.defaultType) {
+  #renderPointsBoard(container, currentSortType = this.#sortModel.defaultSortType) {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
-      pointsBoardContainer: this.#pointsBoardContainer,
+      pointsBoardContainer: container,
       pointsModel: this.#pointsModel,
       sortModel: this.#sortModel
     });
@@ -136,7 +165,7 @@ export default class TripPresenter {
       destinations: this.#destinations,
       offerPack: this.#offerPack,
       typePack: this.#typePack,
-      currentFilter: this.#currentFilter,
+      currentFilter: this.currentFilter,
       onDataChange: this.#handleViewAction,
       currentSortType
     });
@@ -145,6 +174,6 @@ export default class TripPresenter {
   #renderTripBoard() {
     this.#renderTripInfo(this.#tripInfoContainer);
     this.#renderFilters(this.#filterContainer);
-    this.#renderPointsBoard();
+    this.#renderPointsBoard(this.#pointsBoardContainer);
   }
 }

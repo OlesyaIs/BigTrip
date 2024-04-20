@@ -2,8 +2,8 @@ import { SortType } from '../const';
 
 export default class SortModel {
   #sortTypePack = structuredClone(SortType);
-  #defaultType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
-  #currentType = null;
+  #defaultSortType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
+  #currentSortType = null;
 
   get sortTypePack() {
     return this.#sortTypePack;
@@ -13,19 +13,19 @@ export default class SortModel {
     this.#sortTypePack = newSortTypePack;
   }
 
-  get defaultType() {
-    return this.#defaultType;
+  get defaultSortType() {
+    return this.#defaultSortType;
   }
 
-  get currentType() {
-    return this.#currentType;
+  get currentSortType() {
+    return this.#currentSortType;
   }
 
-  set currentType(newType) {
+  set currentSortType(newType) {
     if (!this.#sortTypePack[newType.toUpperCase()]) {
       throw new Error('Can\'t set unknown sort type');
     }
 
-    this.#currentType = newType;
+    this.#currentSortType = newType;
   }
 }
