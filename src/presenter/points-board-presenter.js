@@ -6,6 +6,7 @@ import SortView from '../view/sort-view.js';
 import PointsListView from '../view/points-list-view.js';
 import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
+import NewPointPresenter from './new-point-presenter.js';
 
 export default class PointsBoardPresenter {
   #pointsModel = null;
@@ -25,20 +26,20 @@ export default class PointsBoardPresenter {
   #emptyListMessageComponent = null;
 
   #pointPresenters = new Map();
+  #newPointPresenter = null;
 
   #handleDataChange = null;
+  #handleNewPointDestroy = null;
 
-  constructor({pointsBoardContainer, sortModel, pointsModel}) {
+  constructor({pointsBoardContainer, sortModel, pointsModel, onDataChange, onNewPointDestroy}) {
     this.#pointsBoardContainer = pointsBoardContainer;
     this.#pointsModel = pointsModel;
     this.#sortModel = sortModel;
+    this.#handleDataChange = onDataChange;
+    this.#handleNewPointDestroy = onNewPointDestroy;
 
     this.#sortModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
-  }
-
-  get currentSortType() {
-    return this.#sortModel.currentSortType;
   }
 
   init({
@@ -47,7 +48,6 @@ export default class PointsBoardPresenter {
     offerPack = this.#offerPack,
     typePack = this.#typePack,
     currentFilter = this.#currentFilter,
-    onDataChange = this.#handleDataChange,
   }) {
     this.#destinations = destinations;
     this.#offerPack = offerPack;
@@ -57,35 +57,36 @@ export default class PointsBoardPresenter {
     this.#defaultSortedPoints = sortFunction[this.#sortModel.defaultSortType]([...points]);
     this.#points = [...this.#defaultSortedPoints];
 
-    this.#handleDataChange = onDataChange;
-
     this.#sortPoints(this.#sortModel.currentSortType);
-
-    const previousSortComponent = this.#sortComponent;
-    const previousPointListComponent = this.#pointsListComponent;
-    const previousEmptyListComponent = this.#emptyListMessageComponent;
 
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange, currentSortType: this.#sortModel.currentSortType});
     this.#pointsListComponent = new PointsListView();
     this.#emptyListMessageComponent = new EmptyListMessageView({currentFilter: this.#currentFilter});
 
-    if (!previousSortComponent || !previousPointListComponent || !previousEmptyListComponent) {
-      this.#renderPointsBoard();
-      return;
-    }
+    this.#newPointPresenter = new NewPointPresenter({
+      pointListContainer: this.#pointsListComponent.element,
+      onDataChange: this.#handleDataChange,
+      onDestroy: this.#handleNewPointDestroy
+    });
 
-    this.#clearPointsList();
-    remove(previousSortComponent);
-    remove(previousPointListComponent);
-    remove(previousEmptyListComponent);
     this.#renderPointsBoard();
   }
 
   destroy() {
     this.#clearPointsList();
+    this.#newPointPresenter.destroy();
+    this.#newPointPresenter = null;
     remove(this.#sortComponent);
     remove(this.#pointsListComponent);
     remove(this.#emptyListMessageComponent);
+  }
+
+  createNewPoint() {
+    this.#newPointPresenter.init({
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      typePack: this.#typePack,
+    });
   }
 
   #clearPointsList() {
@@ -94,7 +95,7 @@ export default class PointsBoardPresenter {
   }
 
   #sortPoints = () => {
-    switch (this.currentSortType) {
+    switch (this.#sortModel.currentSortType) {
       case this.#sortTypePack.TIME.type:
         this.#points = sortFunction[this.#sortTypePack.TIME.type](this.#points);
         break;
@@ -124,6 +125,7 @@ export default class PointsBoardPresenter {
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#newPointPresenter.destroy();
   };
 
   #renderEmptyListMessage() {

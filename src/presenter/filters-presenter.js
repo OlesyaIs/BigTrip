@@ -20,16 +20,12 @@ export default class FiltersPresenter {
     return this.#filtersModel.filters;
   }
 
-  get currentFilter() {
-    return this.#filtersModel.currentFilter;
-  }
-
   init() {
     const previousFiltersComponent = this.#filtersComponent;
 
     this.#filtersComponent = new FilterView({
       filters: this.filters,
-      currentFilter: this.currentFilter,
+      currentFilter: this.#filtersModel.currentFilter,
       onFilterChange: this.#handleFilterTypeChange
     });
 
@@ -48,7 +44,7 @@ export default class FiltersPresenter {
   }
 
   #handleFilterTypeChange = (newFilter) => {
-    if (this.currentFilter === newFilter) {
+    if (this.#filtersModel.currentFilter === newFilter) {
       return;
     }
 

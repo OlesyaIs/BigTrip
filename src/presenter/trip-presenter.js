@@ -17,15 +17,17 @@ export default class TripPresenter {
   #tripInfoContainer = null;
   #filterContainer = null;
   #pointsBoardContainer = null;
+  #addNewPointButtonElement = null;
 
   #tripInfoPresenter = null;
   #filtersPresenter = null;
   #pointsBoardPresenter = null;
 
-  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, sortModel, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, addNewPointButtonElement, filtersModel, sortModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#pointsBoardContainer = tripPointsBoardContainer;
+    this.#addNewPointButtonElement = addNewPointButtonElement;
 
     this.#filtersModel = filtersModel;
     this.#sortModel = sortModel;
@@ -40,28 +42,12 @@ export default class TripPresenter {
     return [...this.#filtersModel.filters];
   }
 
-  get currentFilter() {
-    return this.#filtersModel.currentFilter;
-  }
-
-  get defaultSortType() {
-    return this.#sortModel.defaultSortType;
-  }
-
-  get currentSortType() {
-    return this.#sortModel.currentSortType;
-  }
-
-  set currentSortType(newSortType) {
-    this.#sortModel.currentSortType = newSortType;
-  }
-
   get points() {
     return [...this.#pointsModel.points];
   }
 
   get filteredPoints() {
-    return filterFunction[this.currentFilter](this.points);
+    return filterFunction[this.#filtersModel.currentFilter](this.points);
   }
 
   init() {
@@ -69,6 +55,8 @@ export default class TripPresenter {
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
     this.#renderTripBoard();
+
+    this.#addNewPointButtonElement.addEventListener('click', this.#onAddNewPointClick);
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -90,6 +78,7 @@ export default class TripPresenter {
   #handleModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.BOARD:
+        this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
           points: this.filteredPoints
         });
@@ -97,6 +86,7 @@ export default class TripPresenter {
 
       case UpdateType.BOARD_WITH_INFO:
         this.#tripInfoPresenter.init({points: this.points});
+        this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
           points: this.filteredPoints
         });
@@ -104,15 +94,27 @@ export default class TripPresenter {
 
       case UpdateType.FILTERS_WITH_BOARD:
         this.#filtersPresenter.init();
+        this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
           points: this.filteredPoints,
-          currentFilter: this.currentFilter
+          currentFilter: this.#filtersModel.currentFilter
         });
     }
   };
 
   #handleFilterChange = () => {
-    this.currentSortType = this.defaultSortType;
+    this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
+  };
+
+  #onAddNewPointClick = () => {
+    this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
+    this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, this.#filtersModel.defaultFilter);
+    this.#pointsBoardPresenter.createNewPoint(this.#handleNewPointDestroy);
+    this.#addNewPointButtonElement.disabled = true;
+  };
+
+  #handleNewPointDestroy = () => {
+    this.#addNewPointButtonElement.disabled = false;
   };
 
   #renderTripInfo(container) {
@@ -138,7 +140,9 @@ export default class TripPresenter {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
       pointsBoardContainer: container,
       pointsModel: this.#pointsModel,
-      sortModel: this.#sortModel
+      sortModel: this.#sortModel,
+      onDataChange: this.#handleViewAction,
+      onNewPointDestroy: this.#handleNewPointDestroy
     });
 
     this.#pointsBoardPresenter.init({
@@ -146,8 +150,8 @@ export default class TripPresenter {
       destinations: this.#destinations,
       offerPack: this.#offerPack,
       typePack: this.#typePack,
-      currentFilter: this.currentFilter,
-      onDataChange: this.#handleViewAction
+      currentFilter: this.#filtersModel.currentFilter,
+
     });
   }
 

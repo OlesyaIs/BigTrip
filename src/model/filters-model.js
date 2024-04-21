@@ -4,7 +4,8 @@ import Observable from '../framework/observable.js';
 export default class FiltersModel extends Observable {
   #filterPack = structuredClone(FilterType);
   #filters = Object.entries(this.#filterPack).map((filtersPair) => filtersPair[1]);
-  #currentFilter = this.#filterPack.EVERYTHING;
+  #defaultFilter = this.#filterPack.EVERYTHING;
+  #currentFilter = this.#defaultFilter;
 
   get filters() {
     return this.#filters;
@@ -12,6 +13,10 @@ export default class FiltersModel extends Observable {
 
   set filters(newFilterPack) {
     this.#filterPack = newFilterPack;
+  }
+
+  get defaultFilter() {
+    return this.#defaultFilter;
   }
 
   get currentFilter() {

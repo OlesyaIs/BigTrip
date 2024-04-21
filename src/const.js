@@ -70,6 +70,7 @@ const UpdateType = {
   BOARD: 'BOARD',
   BOARD_WITH_INFO: 'BOARD_WITH_INFO',
   FILTERS_WITH_BOARD: 'FILTERS_WITH_BOARD',
+  FULL: 'FULL'
 };
 
 export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT, UserAction, UpdateType };
