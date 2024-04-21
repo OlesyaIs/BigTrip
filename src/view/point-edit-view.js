@@ -183,20 +183,22 @@ export default class PointEditView extends AbstractStatefulView {
   #destinations = null;
   #offerPack = null;
   #handleSubmit = null;
-  #handleClick = null;
+  #handleReturnClick = null;
+  #handleDeleteClick = null;
   #point = null;
 
   #datePickerFrom = null;
   #datePickerTo = null;
 
-  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
+  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick}) {
     super();
 
     this.#typePack = typePack;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#handleSubmit = onSubmit;
-    this.#handleClick = onClick;
+    this.#handleReturnClick = onReturnClick;
+    this.#handleDeleteClick = onDeleteClick;
     this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
     this._setState(PointEditView.parsePointToState(this.#point));
 
@@ -227,7 +229,8 @@ export default class PointEditView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onReturnClick);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange);
@@ -246,9 +249,14 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleSubmit(PointEditView.parseStateToPoint(this._state));
   };
 
-  #onClick = (evt) => {
+  #onReturnClick = (evt) => {
     evt.preventDefault();
-    this.#handleClick(this.#point);
+    this.#handleReturnClick(this.#point);
+  };
+
+  #onDeleteClick = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this.#point);
   };
 
   #onTypeChange = (evt) => {

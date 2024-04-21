@@ -59,7 +59,8 @@ export default class PointPresenter {
       offerPack: this.#offerPack,
       currentPoint: this.#point,
       onSubmit: this.#handleEditFormSubmit,
-      onClick: this.#handleEditFormCancel,
+      onReturnClick: this.#handleEditFormCancel,
+      onDeleteClick: this.#handleDeleteClick
     });
 
     if (this.#pointItemComponent === null) {
@@ -122,7 +123,6 @@ export default class PointPresenter {
       UpdateType.BOARD_WITH_INFO,
       point
     );
-    this.#replaceEditFormToPoint();
   };
 
   #handleEditFormCancel = (point) => {
@@ -135,6 +135,14 @@ export default class PointPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.POINT,
       {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.BOARD_WITH_INFO,
+      point
     );
   };
 }
