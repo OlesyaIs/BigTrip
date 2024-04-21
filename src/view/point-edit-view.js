@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
-import { FLATPICKR_DATE_FORMAT } from '../const.js';
+import { FLATPICKR_DATE_FORMAT, PointEditMode } from '../const.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -152,8 +152,27 @@ const createDestinationInfoTemplate = (currentDestination) => {
     </section>`
   );
 };
+const createButtonsTemplate = (mode) => {
+  let resetButtonTemplate = '';
+  let rollupButtonTemplate = '';
 
-const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint) => {
+  switch (mode) {
+    case PointEditMode.ADD:
+      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Cancel</button>';
+      break;
+    case PointEditMode.EDIT:
+      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Delete</button>';
+      rollupButtonTemplate = '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>';
+      break;
+  }
+  return (
+    `<button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+    ${resetButtonTemplate}
+    ${rollupButtonTemplate}`
+  );
+};
+
+const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint, mode) => {
   const editedPoint = currentPoint;
   const types = Object.values(typePack).map((element) => element.type);
   const keyType = formatToScreamingSnakeCase(editedPoint.type);
@@ -166,9 +185,7 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
         ${createDestinationWithTypeTemplate(editedPoint, destinations, currentDestination)}
         ${createTimeTemplate(editedPoint)}
         ${createPriceTemplate(editedPoint)}
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${currentPoint ? 'Delete' : 'Cancel'}</button>
-        ${currentPoint ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : ''}
+        ${createButtonsTemplate(mode)}
       </header>
       <section class="event__details">
         ${createOffersTemplate(editedPoint, offerPack[keyType])}
@@ -186,11 +203,12 @@ export default class PointEditView extends AbstractStatefulView {
   #handleReturnClick = null;
   #handleDeleteClick = null;
   #point = null;
+  #mode = null;
 
   #datePickerFrom = null;
   #datePickerTo = null;
 
-  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick}) {
+  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick, mode}) {
     super();
 
     this.#typePack = typePack;
@@ -200,13 +218,14 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleReturnClick = onReturnClick;
     this.#handleDeleteClick = onDeleteClick;
     this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
+    this.#mode = mode;
     this._setState(PointEditView.parsePointToState(this.#point));
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state);
+    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state, this.#mode);
   }
 
   reset(point) {
@@ -229,11 +248,14 @@ export default class PointEditView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onReturnClick);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange);
+
+    if (this.#mode === PointEditMode.EDIT) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onReturnClick);
+    }
 
     const offersGroup = this.element.querySelector('.event__available-offers');
     if (offersGroup) {

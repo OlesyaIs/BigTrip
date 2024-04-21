@@ -1,16 +1,13 @@
 import { nanoid } from 'nanoid';
 import { isEscKeydown } from '../utils/common-utils.js';
 import { render, remove, RenderPosition } from '../framework/render';
-import { UpdateType, UserAction } from '../const';
+import { PointEditMode, UpdateType, UserAction } from '../const';
 
 import PointItemView from '../view/point-item-view.js';
 import PointEditView from '../view/point-edit-view.js';
 
 export default class NewPointPresenter {
-  #destinations = [];
-  #offerPack = {};
-  #typePack = {};
-
+  #pointsModel = null;
   #pointListContainer = null;
   #pointItemComponent = null;
   #pointEditComponent = null;
@@ -18,23 +15,32 @@ export default class NewPointPresenter {
   #handleDataChange = null;
   #handleDestroy = null;
 
-  constructor({pointListContainer, onDataChange, onDestroy}) {
+  constructor({pointsModel, pointListContainer, onDataChange, onDestroy}) {
+    this.#pointsModel = pointsModel;
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
   }
 
-  init({destinations, offerPack, typePack}) {
-    this.#destinations = destinations;
-    this.#offerPack = offerPack;
-    this.#typePack = typePack;
+  get destinations() {
+    return [...this.#pointsModel.destinations];
+  }
 
+  get offerPack() {
+    return {...this.#pointsModel.offerPack};
+  }
 
+  get typePack() {
+    return {...this.#pointsModel.typePack};
+  }
+
+  init() {
     this.#pointItemComponent = new PointItemView();
     this.#pointEditComponent = new PointEditView({
-      typePack: this.#typePack,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
+      mode: PointEditMode.ADD,
+      typePack: this.typePack,
+      destinations: this.destinations,
+      offerPack: this.offerPack,
       onSubmit: this.#handleSubmitClick,
       onReturnClick: this.#handleReturnClick,
       onDeleteClick: this.#handleDeleteClick
@@ -50,7 +56,6 @@ export default class NewPointPresenter {
     if (!this.#pointItemComponent) {
       return;
     }
-    this.#handleNewPointDestroy();
     remove(this.#pointEditComponent);
     remove(this.#pointItemComponent);
     this.#pointEditComponent = null;
@@ -66,17 +71,17 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.BOARD_WITH_INFO,
-      {id: nanoid(), ...point}
+      {...point, id: nanoid()}
     );
-    this.destroy();
+    this.#handleNewPointDestroy();
   };
 
   #handleReturnClick = () => {
-    this.destroy();
+    this.#handleNewPointDestroy();
   };
 
   #handleDeleteClick = () => {
-    this.destroy();
+    this.#handleNewPointDestroy();
   };
 
   #onEscKeydown = (evt) => {
@@ -85,6 +90,6 @@ export default class NewPointPresenter {
     }
 
     evt.preventDefault();
-    this.destroy();
+    this.#handleNewPointDestroy();
   };
 }

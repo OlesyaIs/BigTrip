@@ -1,15 +1,13 @@
 import { render, replace, remove } from '../framework/render.js';
 import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
-import { Mode, UserAction, UpdateType } from '../const.js';
+import { Mode, PointEditMode, UserAction, UpdateType } from '../const.js';
 
 import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
 import PointEditView from '../view/point-edit-view.js';
 
 export default class PointPresenter {
-  #destinations = [];
-  #offerPack = {};
-  #typePack = {};
+  #pointsModel = null;
   #point = null;
 
   #mode = Mode.DEFAULT;
@@ -21,29 +19,36 @@ export default class PointPresenter {
   #pointComponent = null;
   #pointEditComponent = null;
 
-  constructor({pointListContainer, onDataChange, onModeChange}) {
+  constructor({pointsModel, pointListContainer, onDataChange, onModeChange}) {
+    this.#pointsModel = pointsModel;
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
+  get destinations() {
+    return [...this.#pointsModel.destinations];
+  }
+
+  get offerPack() {
+    return {...this.#pointsModel.offerPack};
+  }
+
+  get typePack() {
+    return {...this.#pointsModel.typePack};
+  }
+
   init({
     point,
-    destinations = this.#destinations,
-    offerPack = this.#offerPack,
-    typePack = this.#typePack
   }) {
     this.#point = point;
-    this.#destinations = destinations;
-    this.#offerPack = offerPack;
-    this.#typePack = typePack;
 
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
     const currentPointKeyType = formatToScreamingSnakeCase(this.#point.type);
-    const currentDestination = this.#destinations.find((destination) => destination.id === this.#point.destination);
-    const currentTypeFullOffers = this.#offerPack[currentPointKeyType];
+    const currentDestination = this.destinations.find((destination) => destination.id === this.#point.destination);
+    const currentTypeFullOffers = this.offerPack[currentPointKeyType];
 
     this.#pointComponent = new PointView({
       currentPoint: this.#point,
@@ -54,9 +59,10 @@ export default class PointPresenter {
     });
 
     this.#pointEditComponent = new PointEditView({
-      typePack: this.#typePack,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
+      mode: PointEditMode.EDIT,
+      typePack: this.typePack,
+      destinations: this.destinations,
+      offerPack: this.offerPack,
       currentPoint: this.#point,
       onSubmit: this.#handleEditFormSubmit,
       onReturnClick: this.#handleEditFormCancel,

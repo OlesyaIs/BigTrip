@@ -109,16 +109,18 @@ export default class TripPresenter {
   #onAddNewPointClick = () => {
     this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
     this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, this.#filtersModel.defaultFilter);
-    this.#pointsBoardPresenter.createNewPoint(this.#handleNewPointDestroy);
+    this.#pointsBoardPresenter.createNewPoint();
     this.#addNewPointButtonElement.disabled = true;
   };
 
   #handleNewPointDestroy = () => {
+    this.#pointsBoardPresenter.destroy();
+    this.#pointsBoardPresenter.init({points: this.filteredPoints});
     this.#addNewPointButtonElement.disabled = false;
   };
 
   #renderTripInfo(container) {
-    this.#tripInfoPresenter = new TripInfoPresenter({container});
+    this.#tripInfoPresenter = new TripInfoPresenter({container, pointsModel: this.#pointsModel});
     this.#tripInfoPresenter.init({
       points: this.points,
       destinations: this.#destinations,

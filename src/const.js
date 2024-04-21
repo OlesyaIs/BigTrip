@@ -57,6 +57,11 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
+const PointEditMode = {
+  ADD: 'ADD',
+  EDIT: 'EDIT'
+};
+
 const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
 
 const UserAction = {
@@ -73,4 +78,4 @@ const UpdateType = {
   FULL: 'FULL'
 };
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT, UserAction, UpdateType };
+export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, PointEditMode, FLATPICKR_DATE_FORMAT, UserAction, UpdateType };

@@ -17,7 +17,7 @@ export default class FiltersPresenter {
   }
 
   get filters() {
-    return this.#filtersModel.filters;
+    return [...this.#filtersModel.filters];
   }
 
   init() {
