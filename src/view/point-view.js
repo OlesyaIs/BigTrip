@@ -3,6 +3,8 @@ import { getInteger, getStringWithUpperCaseFirst } from '../utils/common-utils.j
 import { formatFullDate, formatDate, formatTime, getDuration } from '../utils/date-utils.js';
 import { ButtonFavoriteClassName } from '../const.js';
 
+import he from 'he';
+
 const createDateTemplate = (startDate) => `<time class="event__date" datetime=${formatFullDate(startDate)}>${formatDate(startDate)}</time>`;
 
 const createTypeTemplate = (type) => (
@@ -40,7 +42,7 @@ const createScheduleTemplate = (startDate, endDate) => {
 
 const createPriceTemplate = (price) => (
   `<p class="event__price">
-    &euro;&nbsp;<span class="event__price-value">${price}</span>
+    &euro;&nbsp;<span class="event__price-value">${he.encode(price.toString())}</span>
   </p>`
 );
 
