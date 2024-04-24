@@ -1,10 +1,12 @@
 import { render, replace, remove } from '../framework/render.js';
 import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
-import { Mode, PointEditMode, UserAction, UpdateType } from '../const.js';
+import { Mode, PointEditMode, ResetEditPointMode, UserAction, UpdateType } from '../const.js';
 
 import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
 import PointEditView from '../view/point-edit-view.js';
+
+import PointValidator from '../utils/point-validate-utils.js';
 
 export default class PointPresenter {
   #pointsModel = null;
@@ -18,6 +20,8 @@ export default class PointPresenter {
   #pointItemComponent = null;
   #pointComponent = null;
   #pointEditComponent = null;
+
+  #formValidator = new PointValidator();
 
   constructor({pointsModel, pointListContainer, onDataChange, onModeChange}) {
     this.#pointsModel = pointsModel;
@@ -64,9 +68,11 @@ export default class PointPresenter {
       destinations: this.destinations,
       offerPack: this.offerPack,
       currentPoint: this.#point,
-      onSubmit: this.#handleEditFormSubmit,
-      onReturnClick: this.#handleEditFormCancel,
-      onDeleteClick: this.#handleDeleteClick
+      onSubmit: this.#handleFormSubmit,
+      onReturnClick: this.#handleCancelClick,
+      onDeleteClick: this.#handleDeleteClick,
+      onUpdateElement: this.#handleUpdateElement,
+      onPriceInput: this.#handlePriceInput
     });
 
     if (this.#pointItemComponent === null) {
@@ -102,28 +108,36 @@ export default class PointPresenter {
     document.addEventListener('keydown', this.#onEscKeydown);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
   }
 
   #replaceEditFormToPoint() {
     replace(this.#pointComponent, this.#pointEditComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
     this.#mode = Mode.DEFAULT;
+    this.#formValidator.destroy();
   }
-
-  #onEscKeydown = (evt) => {
-    if (!isEscKeydown(evt)) {
-      return;
-    }
-
-    evt.preventDefault();
-    this.#replaceEditFormToPoint();
-  };
 
   #handleEditClick = () => {
     this.#replacePointToEditPoint();
   };
 
-  #handleEditFormSubmit = (point) => {
+  #handleUpdateElement = () => {
+    this.#formValidator.destroy();
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
+  };
+
+  #handleFormSubmit = (point) => {
+    if (!this.#formValidator.validatePoint()) {
+      return;
+    }
+
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.BOARD_WITH_INFO,
@@ -131,8 +145,8 @@ export default class PointPresenter {
     );
   };
 
-  #handleEditFormCancel = (point) => {
-    this.#pointEditComponent.reset(point);
+  #handleCancelClick = (point) => {
+    this.#pointEditComponent.reset(point, ResetEditPointMode.CLOSE);
     this.#replaceEditFormToPoint();
   };
 
@@ -150,5 +164,18 @@ export default class PointPresenter {
       UpdateType.BOARD_WITH_INFO,
       point
     );
+  };
+
+  #handlePriceInput = () => {
+    this.#formValidator.resetErrors();
+  };
+
+  #onEscKeydown = (evt) => {
+    if (!isEscKeydown(evt)) {
+      return;
+    }
+
+    evt.preventDefault();
+    this.#replaceEditFormToPoint();
   };
 }

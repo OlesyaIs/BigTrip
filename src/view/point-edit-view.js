@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
-import { FLATPICKR_DATE_FORMAT, PointEditMode } from '../const.js';
+import { ResetEditPointMode, FLATPICKR_DATE_FORMAT, PointEditMode } from '../const.js';
 
 import flatpickr from 'flatpickr';
 import he from 'he';
@@ -56,7 +56,7 @@ const createDestinationWithTypeTemplate = (point, destinations, currentDestinati
     <label class="event__label  event__type-output" for="event-destination-1">
       ${getStringWithUpperCaseFirst(point.type)}
     </label>
-    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1" required>`}
+    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1" required data-pristine-required-message="Необходимо выбрать пункт назчачения">`}
     ${`<datalist id="destination-list-1">
         ${destinations.map((element) => `<option value="${element.name}"></option>`).join('')}
       </datalist>`}
@@ -84,7 +84,7 @@ const createPriceTemplate = ({basePrice}) => (
       <span class="visually-hidden">Price</span>
       &euro;
     </label>
-    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}" pattern="[0-9]{1,}" required>
+    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}" pattern="/(^[0-9]+$)/" required data-pristine-required-message="Необходимо указать стоимость" data-pristine-pattern-message="Необходимо ввести целое положительное число">
   </div>`
 );
 
@@ -204,13 +204,16 @@ export default class PointEditView extends AbstractStatefulView {
   #handleSubmit = null;
   #handleReturnClick = null;
   #handleDeleteClick = null;
+  #handleUpdateElement = null;
+  #handlePriceInput = null;
+
   #point = null;
   #mode = null;
 
   #datePickerFrom = null;
   #datePickerTo = null;
 
-  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick, mode}) {
+  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick, onUpdateElement, onPriceInput, mode}) {
     super();
 
     this.#typePack = typePack;
@@ -219,6 +222,9 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleSubmit = onSubmit;
     this.#handleReturnClick = onReturnClick;
     this.#handleDeleteClick = onDeleteClick;
+    this.#handleUpdateElement = onUpdateElement;
+    this.#handlePriceInput = onPriceInput;
+
     this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
     this.#mode = mode;
     this._setState(PointEditView.parsePointToState(this.#point));
@@ -230,8 +236,31 @@ export default class PointEditView extends AbstractStatefulView {
     return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state, this.#mode);
   }
 
-  reset(point) {
-    this.updateElement(PointEditView.parsePointToState(point));
+  static parsePointToState(point) {
+    return structuredClone(point);
+  }
+
+  static parseStateToPoint(state) {
+    return structuredClone(state);
+  }
+
+  updateElement(update) {
+    super.updateElement(update);
+
+    if (this.#handleUpdateElement) {
+      this.#handleUpdateElement();
+    }
+  }
+
+  reset(point, mode) {
+    switch (mode) {
+      case ResetEditPointMode.CLOSE:
+        this._setState(PointEditView.parsePointToState(point));
+        break;
+      case ResetEditPointMode.RERENDER:
+        this.updateElement(PointEditView.parsePointToState(point));
+        break;
+    }
   }
 
   removeElement() {
@@ -254,6 +283,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#onPriceInput);
 
     if (this.#mode === PointEditMode.EDIT) {
       this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onReturnClick);
@@ -317,19 +347,20 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  static parsePointToState(point) {
-    return structuredClone(point);
-  }
-
-  static parseStateToPoint(state) {
-    return structuredClone(state);
-  }
-
   #onPriceChange = (evt) => {
     evt.preventDefault();
     this._setState({
       basePrice: evt.target.value
     });
+  };
+
+  #onPriceInput = (evt) => {
+    if (!this.#handlePriceInput) {
+      return;
+    }
+
+    evt.preventDefault();
+    this.#handlePriceInput();
   };
 
   #onDateFromChange = ([userDate]) => {

@@ -6,6 +6,8 @@ import { PointEditMode, UpdateType, UserAction } from '../const';
 import PointItemView from '../view/point-item-view.js';
 import PointEditView from '../view/point-edit-view.js';
 
+import PointValidator from '../utils/point-validate-utils.js';
+
 export default class NewPointPresenter {
   #pointsModel = null;
   #pointListContainer = null;
@@ -14,6 +16,8 @@ export default class NewPointPresenter {
 
   #handleDataChange = null;
   #handleDestroy = null;
+
+  #formValidator = new PointValidator();
 
   constructor({pointsModel, pointListContainer, onDataChange, onDestroy}) {
     this.#pointsModel = pointsModel;
@@ -41,13 +45,20 @@ export default class NewPointPresenter {
       typePack: this.typePack,
       destinations: this.destinations,
       offerPack: this.offerPack,
-      onSubmit: this.#handleSubmitClick,
-      onReturnClick: this.#handleReturnClick,
-      onDeleteClick: this.#handleDeleteClick
+      onSubmit: this.#handleFormSubmit,
+      onDeleteClick: this.#handleCancelClick,
+      onUpdateElement: this.#handleUpdateElement,
+      onPriceInput: this.#handlePriceInput
     });
 
     render(this.#pointItemComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
     render(this.#pointEditComponent, this.#pointItemComponent.element);
+
+
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
 
     document.addEventListener('keydown', this.#onEscKeydown);
   }
@@ -56,6 +67,7 @@ export default class NewPointPresenter {
     if (!this.#pointItemComponent) {
       return;
     }
+    this.#formValidator.destroy();
     remove(this.#pointEditComponent);
     remove(this.#pointItemComponent);
     this.#pointEditComponent = null;
@@ -67,7 +79,19 @@ export default class NewPointPresenter {
     this.#handleDestroy();
   }
 
-  #handleSubmitClick = (point) => {
+  #handleUpdateElement = () => {
+    this.#formValidator.destroy();
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
+  };
+
+  #handleFormSubmit = (point) => {
+    if (!this.#formValidator.validatePoint()) {
+      return;
+    }
+
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.BOARD_WITH_INFO,
@@ -76,12 +100,12 @@ export default class NewPointPresenter {
     this.#handleNewPointDestroy();
   };
 
-  #handleReturnClick = () => {
+  #handleCancelClick = () => {
     this.#handleNewPointDestroy();
   };
 
-  #handleDeleteClick = () => {
-    this.#handleNewPointDestroy();
+  #handlePriceInput = () => {
+    this.#formValidator.resetErrors();
   };
 
   #onEscKeydown = (evt) => {
