@@ -1,14 +1,33 @@
 import { SortType } from '../const';
+import Observable from '../framework/observable';
 
-export default class SortModel {
+export default class SortModel extends Observable {
   #sortTypePack = structuredClone(SortType);
-  #defaultType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
+  #defaultSortType = Object.values(SortType).find((typeElement) => typeElement.isDefault).type;
+  #currentSortType = this.#defaultSortType;
 
   get sortTypePack() {
     return this.#sortTypePack;
   }
 
-  get defaultType() {
-    return this.#defaultType;
+  set sortTypePack(newSortTypePack) {
+    this.#sortTypePack = newSortTypePack;
+  }
+
+  get defaultSortType() {
+    return this.#defaultSortType;
+  }
+
+  get currentSortType() {
+    return this.#currentSortType;
+  }
+
+  set currentSortType(newSortType) {
+    this.#currentSortType = newSortType;
+  }
+
+  setCurrentSortType(updateType, newSortType) {
+    this.#currentSortType = newSortType;
+    this._notify(updateType, newSortType);
   }
 }

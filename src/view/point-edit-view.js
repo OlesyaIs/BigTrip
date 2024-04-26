@@ -1,8 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
-import { FLATPICKR_DATE_FORMAT } from '../const.js';
+import { ResetEditPointMode, FLATPICKR_DATE_FORMAT, PointEditMode } from '../const.js';
+
 import flatpickr from 'flatpickr';
+import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -54,7 +56,7 @@ const createDestinationWithTypeTemplate = (point, destinations, currentDestinati
     <label class="event__label  event__type-output" for="event-destination-1">
       ${getStringWithUpperCaseFirst(point.type)}
     </label>
-    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1">`}
+    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1" required data-pristine-required-message="Необходимо выбрать пункт назчачения">`}
     ${`<datalist id="destination-list-1">
         ${destinations.map((element) => `<option value="${element.name}"></option>`).join('')}
       </datalist>`}
@@ -82,7 +84,7 @@ const createPriceTemplate = ({basePrice}) => (
       <span class="visually-hidden">Price</span>
       &euro;
     </label>
-    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}" pattern="/(^[0-9]+$)/" required data-pristine-required-message="Необходимо указать стоимость" data-pristine-pattern-message="Необходимо ввести целое положительное число">
   </div>`
 );
 
@@ -152,8 +154,27 @@ const createDestinationInfoTemplate = (currentDestination) => {
     </section>`
   );
 };
+const createButtonsTemplate = (mode) => {
+  let resetButtonTemplate = '';
+  let rollupButtonTemplate = '';
 
-const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint) => {
+  switch (mode) {
+    case PointEditMode.ADD:
+      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Cancel</button>';
+      break;
+    case PointEditMode.EDIT:
+      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Delete</button>';
+      rollupButtonTemplate = '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>';
+      break;
+  }
+  return (
+    `<button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+    ${resetButtonTemplate}
+    ${rollupButtonTemplate}`
+  );
+};
+
+const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint, mode) => {
   const editedPoint = currentPoint;
   const types = Object.values(typePack).map((element) => element.type);
   const keyType = formatToScreamingSnakeCase(editedPoint.type);
@@ -166,9 +187,7 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
         ${createDestinationWithTypeTemplate(editedPoint, destinations, currentDestination)}
         ${createTimeTemplate(editedPoint)}
         ${createPriceTemplate(editedPoint)}
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${currentPoint ? 'Delete' : 'Cancel'}</button>
-        ${currentPoint ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : ''}
+        ${createButtonsTemplate(mode)}
       </header>
       <section class="event__details">
         ${createOffersTemplate(editedPoint, offerPack[keyType])}
@@ -183,32 +202,65 @@ export default class PointEditView extends AbstractStatefulView {
   #destinations = null;
   #offerPack = null;
   #handleSubmit = null;
-  #handleClick = null;
+  #handleReturnClick = null;
+  #handleDeleteClick = null;
+  #handleUpdateElement = null;
+  #handlePriceInput = null;
+
   #point = null;
+  #mode = null;
 
   #datePickerFrom = null;
   #datePickerTo = null;
 
-  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onClick}) {
+  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick, onUpdateElement, onPriceInput, mode}) {
     super();
 
     this.#typePack = typePack;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#handleSubmit = onSubmit;
-    this.#handleClick = onClick;
+    this.#handleReturnClick = onReturnClick;
+    this.#handleDeleteClick = onDeleteClick;
+    this.#handleUpdateElement = onUpdateElement;
+    this.#handlePriceInput = onPriceInput;
+
     this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
+    this.#mode = mode;
     this._setState(PointEditView.parsePointToState(this.#point));
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state);
+    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state, this.#mode);
   }
 
-  reset(point) {
-    this.updateElement(PointEditView.parsePointToState(point));
+  static parsePointToState(point) {
+    return structuredClone(point);
+  }
+
+  static parseStateToPoint(state) {
+    return structuredClone(state);
+  }
+
+  updateElement(update) {
+    super.updateElement(update);
+
+    if (this.#handleUpdateElement) {
+      this.#handleUpdateElement();
+    }
+  }
+
+  reset(point, mode) {
+    switch (mode) {
+      case ResetEditPointMode.CLOSE:
+        this._setState(PointEditView.parsePointToState(point));
+        break;
+      case ResetEditPointMode.RERENDER:
+        this.updateElement(PointEditView.parsePointToState(point));
+        break;
+    }
   }
 
   removeElement() {
@@ -227,10 +279,15 @@ export default class PointEditView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClick);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onTypeChange);
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#onPriceInput);
+
+    if (this.#mode === PointEditMode.EDIT) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onReturnClick);
+    }
 
     const offersGroup = this.element.querySelector('.event__available-offers');
     if (offersGroup) {
@@ -246,9 +303,14 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleSubmit(PointEditView.parseStateToPoint(this._state));
   };
 
-  #onClick = (evt) => {
+  #onReturnClick = (evt) => {
     evt.preventDefault();
-    this.#handleClick(this.#point);
+    this.#handleReturnClick(this.#point);
+  };
+
+  #onDeleteClick = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this.#point);
   };
 
   #onTypeChange = (evt) => {
@@ -285,19 +347,20 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  static parsePointToState(point) {
-    return structuredClone(point);
-  }
-
-  static parseStateToPoint(state) {
-    return structuredClone(state);
-  }
-
   #onPriceChange = (evt) => {
     evt.preventDefault();
     this._setState({
       basePrice: evt.target.value
     });
+  };
+
+  #onPriceInput = (evt) => {
+    if (!this.#handlePriceInput) {
+      return;
+    }
+
+    evt.preventDefault();
+    this.#handlePriceInput();
   };
 
   #onDateFromChange = ([userDate]) => {

@@ -1,8 +1,27 @@
 const POINTS_QUANTITY = 3;
 
+const TIME_FORMAT = 'HH:mm';
+const SHORT_DATE_FORMAT = 'MMM DD';
+const FULL_DATE_FORMAT = 'DD/MM/YY HH:mm';
+const DAY_MONTH_FORMAT = 'DD MMM';
+const DAY_ONLY_FORMAT = 'DD';
+const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
+
 const ButtonFavoriteClassName = {
   BASE: 'event__favorite-btn',
   ACTIVE: 'event__favorite-btn--active',
+};
+
+const EditValidatorSettingClassName = {
+  ERROR_TEXT_PARENT: 'event__field-group',
+  ERROR_TEXT: 'event__validation-error'
+};
+
+const EditPointInputId = {
+  DESTINATION: 'event-destination-1',
+  PRICE: 'event-price-1',
+  STARTTIME: 'event-start-time-1',
+  ENDTIME: 'event-end-time-1'
 };
 
 const FilterType = {
@@ -10,6 +29,13 @@ const FilterType = {
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past',
+};
+
+const EmptyListMessage = {
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.FUTURE]: 'There are no future events now',
+  [FilterType.PRESENT]: 'There are no present events now',
+  [FilterType.PAST]: 'There are no past events now',
 };
 
 const SortType = {
@@ -45,18 +71,58 @@ const SortType = {
   }
 };
 
-const EmptyListMessage = {
-  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
-  [FilterType.FUTURE]: 'There are no future events now',
-  [FilterType.PRESENT]: 'There are no present events now',
-  [FilterType.PAST]: 'There are no past events now',
-};
-
 const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
 };
 
-const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
+const PointEditMode = {
+  ADD: 'ADD',
+  EDIT: 'EDIT'
+};
 
-export { POINTS_QUANTITY, ButtonFavoriteClassName, FilterType, SortType, EmptyListMessage, Mode, FLATPICKR_DATE_FORMAT };
+const ResetEditPointMode = {
+  RERENDER: 'RERENDER',
+  CLOSE: 'CLOSE'
+};
+
+const ValidateErrorMessage = {
+  REQUIRE_DATE: 'Необходимо заполнить дату',
+  INKNOWN_DESTINATION: 'Необходимо выбрать пункт из списка'
+};
+
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+
+const UpdateType = {
+  POINT: 'POINT',
+  BOARD: 'BOARD',
+  BOARD_WITH_INFO: 'BOARD_WITH_INFO',
+  FILTERS_WITH_BOARD: 'FILTERS_WITH_BOARD',
+  FULL: 'FULL'
+};
+
+export {
+  POINTS_QUANTITY,
+  ButtonFavoriteClassName,
+  EditValidatorSettingClassName,
+  EditPointInputId,
+  ValidateErrorMessage,
+  FilterType,
+  SortType,
+  EmptyListMessage,
+  Mode,
+  PointEditMode,
+  ResetEditPointMode,
+  TIME_FORMAT,
+  SHORT_DATE_FORMAT,
+  FULL_DATE_FORMAT,
+  DAY_MONTH_FORMAT,
+  DAY_ONLY_FORMAT,
+  FLATPICKR_DATE_FORMAT,
+  UserAction,
+  UpdateType
+};

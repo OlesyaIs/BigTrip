@@ -70,7 +70,7 @@ const sortArrayToIncrease = (array) => array.sort((a, b) => (a - b));
 // Проверки
 const isEscKeydown = (evt) => evt.key === 'Escape';
 
-const updateItem = (items, updatedItem) => items.map((item) => item.id === updatedItem.id ? updatedItem : item);
+// const updateItem = (items, updatedItem) => items.map((item) => item.id === updatedItem.id ? updatedItem : item);
 
 export {
   getInteger,
@@ -83,5 +83,5 @@ export {
   getSomeRandomArrayElements,
   sortArrayToIncrease,
   isEscKeydown,
-  updateItem,
+  // updateItem,
 };

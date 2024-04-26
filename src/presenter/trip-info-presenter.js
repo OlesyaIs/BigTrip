@@ -9,52 +9,60 @@ import TripCostView from '../view/trip-cost-view.js';
 
 export default class TripInfoPresenter {
   #sortedPoints = [];
-  #destinations = [];
-  #offerPack = {};
+  #pointsModel = null;
 
   #tripInfoContainer = null;
   #tripInfoComponent = null;
   #tripRouteComponent = null;
   #tripCostComponent = null;
 
-  constructor({container}) {
+  constructor({container, pointsModel}) {
     this.#tripInfoContainer = container;
+    this.#pointsModel = pointsModel;
   }
 
-  init({points, destinations, offerPack}) {
-    this.#sortedPoints = sortFunction[SortType.DAY.type]([...points]);
-    this.#destinations = destinations;
-    this.#offerPack = offerPack;
+  get destinations() {
+    return [...this.#pointsModel.destinations];
+  }
 
+  get offerPack() {
+    return {...this.#pointsModel.offerPack};
+  }
+
+  init({points}) {
+    if (points.length === 0) {
+      this.destroy();
+      this.#tripInfoComponent = null;
+      this.#tripRouteComponent = null;
+      this.#tripCostComponent = null;
+      return;
+    }
+
+    this.#sortedPoints = sortFunction[SortType.DAY.type]([...points]);
     const previousInfoComponent = this.#tripInfoComponent;
-    const previousRouteComponent = this.#tripRouteComponent;
-    const previousCostComponent = this.#tripCostComponent;
+
+    this.#tripInfoComponent = new TripInfoView();
 
     this.#tripRouteComponent = new TripRouteView({
-      destinationNames: getTripRouteDestinations(this.#sortedPoints, this.#destinations),
+      destinationNames: getTripRouteDestinations(this.#sortedPoints, this.destinations),
       timing: {
         dateFrom: this.#sortedPoints[0].dateFrom,
         dateTo: this.#sortedPoints[this.#sortedPoints.length - 1].dateTo,
       }
     });
 
-    this.#tripCostComponent = new TripCostView({cost: getTripCost(this.#sortedPoints, this.#offerPack)});
+    this.#tripCostComponent = new TripCostView({cost: getTripCost(this.#sortedPoints, this.offerPack)});
 
-    if (!previousInfoComponent) {
-      this.#tripInfoComponent = new TripInfoView();
+    if (!previousInfoComponent || !this.#tripInfoContainer.contains(previousInfoComponent.element)) {
       render(this.#tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
       render(this.#tripRouteComponent, this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
       render(this.#tripCostComponent, this.#tripInfoComponent.element);
       return;
     }
 
-    if (this.#tripInfoComponent.element.contains(previousRouteComponent)) {
-      replace(this.#tripRouteComponent, previousRouteComponent);
-    }
-
-    if (this.#tripInfoComponent.element.contains(previousCostComponent)) {
-      replace(this.#tripCostComponent, previousCostComponent);
-    }
+    replace(this.#tripInfoComponent, previousInfoComponent);
+    render(this.#tripRouteComponent, this.#tripInfoComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#tripCostComponent, this.#tripInfoComponent.element);
   }
 
   destroy() {

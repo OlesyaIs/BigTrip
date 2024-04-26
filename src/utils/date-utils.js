@@ -1,6 +1,6 @@
+import { TIME_FORMAT, SHORT_DATE_FORMAT, FULL_DATE_FORMAT, DAY_MONTH_FORMAT, DAY_ONLY_FORMAT } from '../const.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-// const duration = require('dayjs/plugin/duration');
 dayjs.extend(duration);
 
 // Get
@@ -8,12 +8,7 @@ const getMonth = (date) => dayjs(date).month();
 const getYear = (date) => dayjs(date).year();
 
 // Date formatting
-const TIME_FORMAT = 'HH:mm';
-const SHORT_DATE_FORMAT = 'MMM DD';
-const FULL_DATE_FORMAT = 'DD/MM/YY HH:mm';
 
-const DAY_MONTH_FORMAT = 'DD MMM';
-const DAY_ONLY_FORMAT = 'DD';
 
 const formatSomeDate = (date, format) => date ? dayjs(date).format(format ? format : '') : '';
 

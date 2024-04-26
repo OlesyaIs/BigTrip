@@ -1,15 +1,15 @@
 import { render, replace, remove } from '../framework/render.js';
 import { formatToScreamingSnakeCase, isEscKeydown } from '../utils/common-utils.js';
-import { Mode } from '../const.js';
+import { Mode, PointEditMode, ResetEditPointMode, UserAction, UpdateType } from '../const.js';
 
 import PointItemView from '../view/point-item-view.js';
 import PointView from '../view/point-view.js';
 import PointEditView from '../view/point-edit-view.js';
 
+import PointValidator from '../utils/point-validate-utils.js';
+
 export default class PointPresenter {
-  #destinations = [];
-  #offerPack = {};
-  #typePack = {};
+  #pointsModel = null;
   #point = null;
 
   #mode = Mode.DEFAULT;
@@ -21,24 +21,38 @@ export default class PointPresenter {
   #pointComponent = null;
   #pointEditComponent = null;
 
-  constructor({pointListContainer, onDataChange, onModeChange}) {
+  #formValidator = new PointValidator();
+
+  constructor({pointsModel, pointListContainer, onDataChange, onModeChange}) {
+    this.#pointsModel = pointsModel;
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
-  init({point, destinations, offerPack, typePack}) {
+  get destinations() {
+    return [...this.#pointsModel.destinations];
+  }
+
+  get offerPack() {
+    return {...this.#pointsModel.offerPack};
+  }
+
+  get typePack() {
+    return {...this.#pointsModel.typePack};
+  }
+
+  init({
+    point,
+  }) {
     this.#point = point;
-    this.#destinations = destinations;
-    this.#offerPack = offerPack;
-    this.#typePack = typePack;
 
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
     const currentPointKeyType = formatToScreamingSnakeCase(this.#point.type);
-    const currentDestination = this.#destinations.find((destination) => destination.id === this.#point.destination);
-    const currentTypeFullOffers = this.#offerPack[currentPointKeyType];
+    const currentDestination = this.destinations.find((destination) => destination.id === this.#point.destination);
+    const currentTypeFullOffers = this.offerPack[currentPointKeyType];
 
     this.#pointComponent = new PointView({
       currentPoint: this.#point,
@@ -49,12 +63,16 @@ export default class PointPresenter {
     });
 
     this.#pointEditComponent = new PointEditView({
-      typePack: this.#typePack,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
+      mode: PointEditMode.EDIT,
+      typePack: this.typePack,
+      destinations: this.destinations,
+      offerPack: this.offerPack,
       currentPoint: this.#point,
-      onSubmit: this.#handleEditFormSubmit,
-      onClick: this.#handleEditFormCancel,
+      onSubmit: this.#handleFormSubmit,
+      onReturnClick: this.#handleCancelClick,
+      onDeleteClick: this.#handleDeleteClick,
+      onUpdateElement: this.#handleUpdateElement,
+      onPriceInput: this.#handlePriceInput
     });
 
     if (this.#pointItemComponent === null) {
@@ -74,9 +92,9 @@ export default class PointPresenter {
   }
 
   destroy() {
-    remove(this.#pointItemComponent);
     remove(this.#pointComponent);
     remove(this.#pointEditComponent);
+    remove(this.#pointItemComponent);
   }
 
   resetView() {
@@ -90,13 +108,67 @@ export default class PointPresenter {
     document.addEventListener('keydown', this.#onEscKeydown);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
   }
 
   #replaceEditFormToPoint() {
     replace(this.#pointComponent, this.#pointEditComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
     this.#mode = Mode.DEFAULT;
+    this.#formValidator.destroy();
   }
+
+  #handleEditClick = () => {
+    this.#replacePointToEditPoint();
+  };
+
+  #handleUpdateElement = () => {
+    this.#formValidator.destroy();
+    this.#formValidator.init({
+      formElement: this.#pointEditComponent.element,
+      destinations: this.destinations
+    });
+  };
+
+  #handleFormSubmit = (point) => {
+    if (!this.#formValidator.validatePoint()) {
+      return;
+    }
+
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.BOARD_WITH_INFO,
+      point
+    );
+  };
+
+  #handleCancelClick = (point) => {
+    this.#pointEditComponent.reset(point, ResetEditPointMode.CLOSE);
+    this.#replaceEditFormToPoint();
+  };
+
+  #handleFavoriteClick = () => {
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.POINT,
+      {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.BOARD_WITH_INFO,
+      point
+    );
+  };
+
+  #handlePriceInput = () => {
+    this.#formValidator.resetErrors();
+  };
 
   #onEscKeydown = (evt) => {
     if (!isEscKeydown(evt)) {
@@ -105,23 +177,5 @@ export default class PointPresenter {
 
     evt.preventDefault();
     this.#replaceEditFormToPoint();
-  };
-
-  #handleEditClick = () => {
-    this.#replacePointToEditPoint();
-  };
-
-  #handleEditFormSubmit = (point) => {
-    this.#handleDataChange(point);
-    this.#replaceEditFormToPoint();
-  };
-
-  #handleEditFormCancel = (point) => {
-    this.#pointEditComponent.reset(point);
-    this.#replaceEditFormToPoint();
-  };
-
-  #handleFavoriteClick = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
   };
 }

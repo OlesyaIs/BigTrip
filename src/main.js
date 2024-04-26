@@ -6,6 +6,7 @@ import PointsModel from './model/points-model.js';
 const tripMainElement = document.querySelector('.trip-main');
 const filterContainerElement = tripMainElement.querySelector('.trip-controls__filters');
 const tripPointsBoardContainerElement = document.querySelector('.trip-events');
+const addNewPointButtonElement = tripMainElement.querySelector('.trip-main__event-add-btn');
 
 const filtersModel = new FiltersModel();
 const sortModel = new SortModel();
@@ -15,6 +16,7 @@ const tripPresenter = new TripPresenter({
   tripInfoContainer: tripMainElement,
   filterContainer: filterContainerElement,
   tripPointsBoardContainer: tripPointsBoardContainerElement,
+  addNewPointButtonElement,
   filtersModel,
   sortModel,
   pointsModel,

@@ -1,106 +1,165 @@
-import { render } from '../framework/render.js';
 import { filterFunction } from '../utils/filter-utils.js';
-
-import FilterView from '../view/filter-view.js';
+import { UserAction, UpdateType } from '../const.js';
 
 import TripInfoPresenter from './trip-info-presenter.js';
 import PointsBoardPresenter from './points-board-presenter.js';
+import FiltersPresenter from './filters-presenter.js';
 
 export default class TripPresenter {
   #filtersModel = null;
   #sortModel = null;
   #pointsModel = null;
 
-  #points = [];
-  #sourcedPoints = [];
-  #filters = [];
   #destinations = [];
   #offerPack = {};
   #typePack = {};
-  #currentFilter = null;
 
   #tripInfoContainer = null;
   #filterContainer = null;
   #pointsBoardContainer = null;
-  #filtersComponent = null;
+  #addNewPointButtonElement = null;
 
   #tripInfoPresenter = null;
+  #filtersPresenter = null;
   #pointsBoardPresenter = null;
 
-  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, filtersModel, sortModel, pointsModel}) {
+  constructor({tripInfoContainer, filterContainer, tripPointsBoardContainer, addNewPointButtonElement, filtersModel, sortModel, pointsModel}) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#filterContainer = filterContainer;
     this.#pointsBoardContainer = tripPointsBoardContainer;
+    this.#addNewPointButtonElement = addNewPointButtonElement;
+
     this.#filtersModel = filtersModel;
     this.#sortModel = sortModel;
     this.#pointsModel = pointsModel;
+
+    this.#filtersModel.addObserver(this.#handleModelEvent);
+    this.#sortModel.addObserver(this.#handleModelEvent);
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+  }
+
+  get filters() {
+    return [...this.#filtersModel.filters];
+  }
+
+  get points() {
+    return [...this.#pointsModel.points];
+  }
+
+  get filteredPoints() {
+    return filterFunction[this.#filtersModel.currentFilter](this.points);
   }
 
   init() {
-    this.#filters = [...this.#filtersModel.filters];
-    this.#sourcedPoints = [...this.#pointsModel.points];
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
     this.#typePack = structuredClone(this.#pointsModel.typePack);
-    this.#currentFilter = this.#filtersModel.defaultFilter;
-
-    this.#filterPoints();
     this.#renderTripBoard();
+
+    this.#addNewPointButtonElement.addEventListener('click', this.#onAddNewPointClick);
   }
 
-  #clearPointsBoard() {
-    this.#pointsBoardPresenter.destroy();
-    this.#pointsBoardPresenter = null;
-  }
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_POINT:
+        this.#pointsModel.updatePoint(updateType, update);
+        break;
 
-  #handleFilterChange = (newFilter) => {
-    if (newFilter === this.#currentFilter) {
-      return;
+      case UserAction.ADD_POINT:
+        this.#pointsModel.addPoint(updateType, update);
+        break;
+
+      case UserAction.DELETE_POINT:
+        this.#pointsModel.deletePoint(updateType, update);
+        break;
     }
-
-    this.#currentFilter = newFilter;
-
-    this.#filterPoints();
-    this.#clearPointsBoard();
-    this.#renderPointsBoard();
   };
 
-  #filterPoints = () => {
-    this.#points = filterFunction[this.#currentFilter](this.#sourcedPoints);
+  #handleModelEvent = (updateType) => {
+    switch (updateType) {
+      case UpdateType.BOARD:
+        this.#pointsBoardPresenter.destroy();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
+        break;
+
+      case UpdateType.BOARD_WITH_INFO:
+        this.#tripInfoPresenter.init({points: this.points});
+        this.#pointsBoardPresenter.destroy();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
+        break;
+
+      case UpdateType.FILTERS_WITH_BOARD:
+        this.#filtersPresenter.init();
+        this.#pointsBoardPresenter.destroy();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints,
+          currentFilter: this.#filtersModel.currentFilter
+        });
+    }
+  };
+
+  #handleFilterChange = () => {
+    this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
+  };
+
+  #onAddNewPointClick = () => {
+    this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
+    this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, this.#filtersModel.defaultFilter);
+    this.#pointsBoardPresenter.createNewPoint();
+    this.#addNewPointButtonElement.disabled = true;
+  };
+
+  #handleNewPointDestroy = () => {
+    this.#pointsBoardPresenter.destroy();
+    this.#pointsBoardPresenter.init({points: this.filteredPoints});
+    this.#addNewPointButtonElement.disabled = false;
   };
 
   #renderTripInfo(container) {
-    this.#tripInfoPresenter = new TripInfoPresenter({container});
+    this.#tripInfoPresenter = new TripInfoPresenter({container, pointsModel: this.#pointsModel});
     this.#tripInfoPresenter.init({
-      points: this.#points,
+      points: this.points,
       destinations: this.#destinations,
       offerPack: this.#offerPack,
     });
   }
 
   #renderFilters(container) {
-    this.#filtersComponent = new FilterView({filters: this.#filters, defaultFilter: this.#filtersModel.defaultFilter, onFilterChange: this.#handleFilterChange});
-    render(this.#filtersComponent, container);
+    this.#filtersPresenter = new FiltersPresenter({
+      filtersModel: this.#filtersModel,
+      filtersContainer: container,
+      onFilterChange: this.#handleFilterChange,
+    });
+
+    this.#filtersPresenter.init();
   }
 
-  #renderPointsBoard() {
+  #renderPointsBoard(container) {
     this.#pointsBoardPresenter = new PointsBoardPresenter({
-      pointsBoardContainer: this.#pointsBoardContainer,
-      sortModel: this.#sortModel
+      pointsBoardContainer: container,
+      pointsModel: this.#pointsModel,
+      sortModel: this.#sortModel,
+      onDataChange: this.#handleViewAction,
+      onNewPointDestroy: this.#handleNewPointDestroy
     });
 
     this.#pointsBoardPresenter.init({
-      points: this.#points,
+      points: this.filteredPoints,
       destinations: this.#destinations,
       offerPack: this.#offerPack,
       typePack: this.#typePack,
-      currentFilter: this.#currentFilter
+      currentFilter: this.#filtersModel.currentFilter,
+
     });
   }
 
   #renderTripBoard() {
     this.#renderTripInfo(this.#tripInfoContainer);
     this.#renderFilters(this.#filterContainer);
-    this.#renderPointsBoard();
+    this.#renderPointsBoard(this.#pointsBoardContainer);
   }
 }

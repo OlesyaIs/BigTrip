@@ -3,6 +3,8 @@ import { getInteger, getStringWithUpperCaseFirst } from '../utils/common-utils.j
 import { formatFullDate, formatDate, formatTime, getDuration } from '../utils/date-utils.js';
 import { ButtonFavoriteClassName } from '../const.js';
 
+import he from 'he';
+
 const createDateTemplate = (startDate) => `<time class="event__date" datetime=${formatFullDate(startDate)}>${formatDate(startDate)}</time>`;
 
 const createTypeTemplate = (type) => (
@@ -11,18 +13,24 @@ const createTypeTemplate = (type) => (
   </div>`
 );
 
-const createTitleTemplate = (type, name) => `<h3 class="event__title">${getStringWithUpperCaseFirst(type)} ${name}</h3>`;
+const createTitleTemplate = (type, destination) => `<h3 class="event__title">${getStringWithUpperCaseFirst(type)} ${destination}</h3>`;
 
 
 const createScheduleTemplate = (startDate, endDate) => {
-  const difference = getDuration(startDate, endDate);
-  const days = difference.format('DD');
-  const hours = difference.format('HH');
-  const minutes = difference.format('mm');
+  let eventDurationTemplate = '';
 
-  const daysTemplate = getInteger(days) ? `${days}D` : '';
-  const hoursTemplate = !(getInteger(days) || getInteger(hours)) ? '' : `${hours}H`;
-  const minutesTemplate = `${minutes}M`;
+  if (startDate && endDate) {
+    const difference = getDuration(startDate, endDate);
+    const days = difference.format('DD');
+    const hours = difference.format('HH');
+    const minutes = difference.format('mm');
+
+    const daysTemplate = getInteger(days) ? `${days}D` : '';
+    const hoursTemplate = !(getInteger(days) || getInteger(hours)) ? '' : `${hours}H`;
+    const minutesTemplate = `${minutes}M`;
+
+    eventDurationTemplate = `<p class="event__duration">${daysTemplate} ${hoursTemplate} ${minutesTemplate}</p>`;
+  }
 
   return (
     `<div class="event__schedule">
@@ -31,16 +39,14 @@ const createScheduleTemplate = (startDate, endDate) => {
         &mdash;
         <time class="event__end-time" datetime=${formatFullDate(endDate)}>${formatTime(endDate)}</time>
       </p>
-      <p class="event__duration">
-        ${daysTemplate} ${hoursTemplate} ${minutesTemplate}
-      </p>
+      ${eventDurationTemplate}
     </div>`
   );
 };
 
 const createPriceTemplate = (price) => (
   `<p class="event__price">
-    &euro;&nbsp;<span class="event__price-value">${price}</span>
+    &euro;&nbsp;<span class="event__price-value">${he.encode(price.toString())}</span>
   </p>`
 );
 
@@ -81,11 +87,11 @@ const createButtonFavoriteTemplate = (isFavorite) => {
   );
 };
 
-const createPointTemplate = (point, destination, offers) => (
+const createPointTemplate = (point, destinationTitle, offers) => (
   `<div class="event">
     ${createDateTemplate(point.dateFrom)}
     ${createTypeTemplate(point.type)}
-    ${createTitleTemplate(point.type, destination.name)}
+    ${createTitleTemplate(point.type, destinationTitle)}
     ${createScheduleTemplate(point.dateFrom, point.dateTo)}
     ${createPriceTemplate(point.basePrice)}
     ${createOffersTemplate(point.offers, offers)}
@@ -98,7 +104,7 @@ const createPointTemplate = (point, destination, offers) => (
 
 export default class PointView extends AbstractView {
   #point = null;
-  #destination = null;
+  #destinationTitle = null;
   #offers = null;
   #handleClick = null;
   #handleFavoriteClick = null;
@@ -106,7 +112,7 @@ export default class PointView extends AbstractView {
   constructor({currentPoint, currentDestination, offers, onClick, onFavoriteClick}) {
     super();
     this.#point = currentPoint;
-    this.#destination = currentDestination;
+    this.#destinationTitle = currentDestination ? currentDestination.name : '';
     this.#offers = offers;
     this.#handleClick = onClick;
     this.#handleFavoriteClick = onFavoriteClick;
@@ -116,7 +122,7 @@ export default class PointView extends AbstractView {
   }
 
   get template() {
-    return createPointTemplate(this.#point, this.#destination, this.#offers);
+    return createPointTemplate(this.#point, this.#destinationTitle, this.#offers);
   }
 
   #onClick = (evt) => {

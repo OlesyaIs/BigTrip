@@ -7,29 +7,29 @@ const createFilterTemplate = (filter, isChecked) =>
     <label class="trip-filters__filter-label" for="filter-${filter}">${getStringWithUpperCaseFirst(filter)}</label>
   </div>`;
 
-const createFilterListTemplate = (filters, defaultFilter) =>
+const createFilterListTemplate = (filters, currentFilter) =>
   `<form class="trip-filters" action="#" method="get">
     ${filters
-    .map((filter) => createFilterTemplate(filter, filter === defaultFilter))
+    .map((filter) => createFilterTemplate(filter, filter === currentFilter))
     .join('')}
     <button class="visually-hidden" type="submit">Accept filter</button>
   </form>`;
 
 export default class FilterView extends AbstractView {
   #filters = null;
-  #defaultFilter = null;
+  #currentFilter = null;
   #handleFilterChange = null;
 
-  constructor({filters, defaultFilter, onFilterChange}) {
+  constructor({filters, currentFilter, onFilterChange}) {
     super();
     this.#filters = filters;
-    this.#defaultFilter = defaultFilter;
+    this.#currentFilter = currentFilter;
     this.#handleFilterChange = onFilterChange;
     this.element.addEventListener('change', this.#onFilterChange);
   }
 
   get template() {
-    return createFilterListTemplate(this.#filters, this.#defaultFilter);
+    return createFilterListTemplate(this.#filters, this.#currentFilter);
   }
 
   #onFilterChange = (evt) => {
