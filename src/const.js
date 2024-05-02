@@ -110,7 +110,6 @@ const Method = {
   PUT: 'PUT'
 };
 
-const AUTHORIZATION = 'Basic wfwgh3454efwreeuli6fwef';
 const END_POINT = 'https://20.objects.htmlacademy.pro/big-trip';
 
 export {
@@ -134,6 +133,5 @@ export {
   UserAction,
   UpdateType,
   Method,
-  AUTHORIZATION,
   END_POINT
 };
