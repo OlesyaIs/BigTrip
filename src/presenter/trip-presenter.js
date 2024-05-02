@@ -99,6 +99,15 @@ export default class TripPresenter {
           points: this.filteredPoints,
           currentFilter: this.#filtersModel.currentFilter
         });
+        break;
+
+      case UpdateType.INIT:
+        this.#tripInfoPresenter.init({points: this.points});
+        this.#pointsBoardPresenter.destroy();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
+        break;
     }
   };
 

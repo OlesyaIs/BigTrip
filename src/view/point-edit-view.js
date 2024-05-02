@@ -103,7 +103,7 @@ const createOfferTemplate = (offer, isChecked) => {
   );
 };
 
-const createOffersTemplate = (point, offers) => {
+const createOffersTemplate = (point, offers = []) => {
   if (!offers.length) {
     return '';
   }

@@ -1,5 +1,3 @@
-const POINTS_QUANTITY = 3;
-
 const TIME_FORMAT = 'HH:mm';
 const SHORT_DATE_FORMAT = 'MMM DD';
 const FULL_DATE_FORMAT = 'DD/MM/YY HH:mm';
@@ -36,6 +34,45 @@ const EmptyListMessage = {
   [FilterType.FUTURE]: 'There are no future events now',
   [FilterType.PRESENT]: 'There are no present events now',
   [FilterType.PAST]: 'There are no past events now',
+};
+
+const TypePack = {
+  TAXI: {
+    type: 'taxi',
+    price: 20,
+  },
+  BUS: {
+    type: 'bus',
+    price: 10,
+  },
+  TRAIN: {
+    type: 'train',
+    price: 10,
+  },
+  SHIP: {
+    type: 'ship',
+    price: 10,
+  },
+  DRIVE: {
+    type: 'drive',
+    price: 20,
+  },
+  FLIGHT: {
+    type: 'flight',
+    price: 160,
+  },
+  CHECK_IN: {
+    type: 'check-in',
+    price: 600,
+  },
+  SIGHTSEEING: {
+    type: 'sightseeing',
+    price: 180,
+  },
+  RESTAURANT: {
+    type: 'restaurant',
+    price: 10,
+  },
 };
 
 const SortType = {
@@ -102,7 +139,8 @@ const UpdateType = {
   BOARD: 'BOARD',
   BOARD_WITH_INFO: 'BOARD_WITH_INFO',
   FILTERS_WITH_BOARD: 'FILTERS_WITH_BOARD',
-  FULL: 'FULL'
+  FULL: 'FULL',
+  INIT: 'INIT'
 };
 
 const Method = {
@@ -113,12 +151,12 @@ const Method = {
 const END_POINT = 'https://20.objects.htmlacademy.pro/big-trip';
 
 export {
-  POINTS_QUANTITY,
   ButtonFavoriteClassName,
   EditValidatorSettingClassName,
   EditPointInputId,
   ValidateErrorMessage,
   FilterType,
+  TypePack,
   SortType,
   EmptyListMessage,
   Mode,

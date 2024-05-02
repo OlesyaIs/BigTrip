@@ -1,25 +1,17 @@
-import { createRandomPoint } from '../mock/point.js';
-import { POINTS_QUANTITY } from '../const.js';
-import { DESTINATIONS } from '../mock/destination.js';
-import { OfferPack } from '../mock/offer-pack.js';
-import { TypePack } from '../mock/type-pack.js';
+import { TypePack } from '../const.js';
 import Observable from '../framework/observable.js';
+import { UpdateType } from '../const.js';
 
 export default class PointsModel extends Observable {
-  #pointsApiService = null;
-  #points = Array.from({length: POINTS_QUANTITY}, createRandomPoint);
-  #destinations = DESTINATIONS.slice();
-  #offerPack = structuredClone(OfferPack);
+  #tripApiService = null;
+  #points = [];
+  #destinations = [];
+  #offerPack = {};
   #typePack = structuredClone(TypePack);
 
-  constructor({pointsApiService}) {
+  constructor({tripApiService}) {
     super();
-    this.#pointsApiService = pointsApiService;
-    this.#pointsApiService
-      .points
-      .then((points) => {
-        console.log(points);
-      });
+    this.#tripApiService = tripApiService;
   }
 
   get points() {
@@ -40,6 +32,28 @@ export default class PointsModel extends Observable {
 
   get typePack() {
     return this.#typePack;
+  }
+
+  async init() {
+    try {
+      this.#points = await this.#tripApiService.points;
+    } catch(err) {
+      this.#points = [];
+    }
+
+    try {
+      this.#destinations = await this.#tripApiService.destinations;
+    } catch(err) {
+      this.#destinations = [];
+    }
+
+    try {
+      this.#offerPack = await this.#tripApiService.offerPack;
+    } catch(err) {
+      this.#offerPack = {};
+    }
+
+    this._notify(UpdateType.INIT);
   }
 
   updatePoint(updateType, update) {
