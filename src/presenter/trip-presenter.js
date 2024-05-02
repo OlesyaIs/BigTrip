@@ -105,7 +105,8 @@ export default class TripPresenter {
         this.#tripInfoPresenter.init({points: this.points});
         this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
-          points: this.filteredPoints
+          points: this.filteredPoints,
+          isLoading: false
         });
         break;
     }
