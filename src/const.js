@@ -105,6 +105,14 @@ const UpdateType = {
   FULL: 'FULL'
 };
 
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT'
+};
+
+const AUTHORIZATION = 'Basic wfwgh3454efwreeuli6fwef';
+const END_POINT = 'https://20.objects.htmlacademy.pro/big-trip';
+
 export {
   POINTS_QUANTITY,
   ButtonFavoriteClassName,
@@ -124,5 +132,8 @@ export {
   DAY_ONLY_FORMAT,
   FLATPICKR_DATE_FORMAT,
   UserAction,
-  UpdateType
+  UpdateType,
+  Method,
+  AUTHORIZATION,
+  END_POINT
 };

@@ -6,10 +6,21 @@ import { TypePack } from '../mock/type-pack.js';
 import Observable from '../framework/observable.js';
 
 export default class PointsModel extends Observable {
+  #pointsApiService = null;
   #points = Array.from({length: POINTS_QUANTITY}, createRandomPoint);
   #destinations = DESTINATIONS.slice();
   #offerPack = structuredClone(OfferPack);
   #typePack = structuredClone(TypePack);
+
+  constructor({pointsApiService}) {
+    super();
+    this.#pointsApiService = pointsApiService;
+    this.#pointsApiService
+      .points
+      .then((points) => {
+        console.log(points);
+      });
+  }
 
   get points() {
     return this.#points;
