@@ -15,11 +15,12 @@ export default class TripApiService extends ApiService {
       url: `points/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(this.#adaptPointToServer(point)),
-      headres: new Headers({'Content-Type': 'application/json'})
+      headers: new Headers({'Content-Type': 'application/json'})
     });
 
     const parsedResponse = await ApiService.parseResponse(response);
-    return parsedResponse;
+    const adaptedResponse = this.#adaptPointToClient(parsedResponse);
+    return adaptedResponse;
   }
 
   get destinations() {
@@ -44,7 +45,7 @@ export default class TripApiService extends ApiService {
     delete adaptedPoint.basePrice;
     delete adaptedPoint.dateFrom;
     delete adaptedPoint.dateTo;
-    delete adaptedPoint.basePrice;
+    delete adaptedPoint.isFavorite;
 
     return adaptedPoint;
   }
