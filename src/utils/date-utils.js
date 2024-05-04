@@ -9,7 +9,6 @@ const getYear = (date) => dayjs(date).year();
 
 // Date formatting
 
-
 const formatSomeDate = (date, format) => date ? dayjs(date).format(format ? format : '') : '';
 
 const formatFullDate = (date) => formatSomeDate(date);

@@ -7,6 +7,7 @@ import PointsListView from '../view/points-list-view.js';
 import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class PointsBoardPresenter {
   #pointsModel = null;
@@ -15,18 +16,20 @@ export default class PointsBoardPresenter {
   #points = [];
   #defaultSortedPoints = [];
   #currentFilter = null;
-  // #sortTypePack = null;
 
   #pointsBoardContainer = null;
   #sortComponent = null;
   #pointsListComponent = null;
   #emptyListMessageComponent = null;
+  #loadingMessageComponent = null;
 
   #pointPresenters = new Map();
   #newPointPresenter = null;
 
   #handleDataChange = null;
   #handleNewPointDestroy = null;
+
+  #isLoading = true;
 
   constructor({pointsBoardContainer, sortModel, pointsModel, onDataChange, onNewPointDestroy}) {
     this.#pointsBoardContainer = pointsBoardContainer;
@@ -58,6 +61,7 @@ export default class PointsBoardPresenter {
   init({
     points,
     currentFilter = this.#currentFilter,
+    isLoading
   }) {
     this.#currentFilter = currentFilter;
     this.#defaultSortedPoints = sortFunction[this.#sortModel.defaultSortType]([...points]);
@@ -68,6 +72,7 @@ export default class PointsBoardPresenter {
     this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange, currentSortType: this.#sortModel.currentSortType});
     this.#pointsListComponent = new PointsListView();
     this.#emptyListMessageComponent = new EmptyListMessageView({currentFilter: this.#currentFilter});
+    this.#loadingMessageComponent = new LoadingView();
 
     this.#newPointPresenter = new NewPointPresenter({
       pointsModel: this.#pointsModel,
@@ -75,6 +80,11 @@ export default class PointsBoardPresenter {
       onDataChange: this.#handleDataChange,
       onDestroy: this.#handleNewPointDestroy
     });
+
+    if (!(isLoading === undefined)) {
+      this.#isLoading = isLoading;
+    }
+
 
     this.#renderPointsBoard();
   }
@@ -86,6 +96,7 @@ export default class PointsBoardPresenter {
     remove(this.#sortComponent);
     remove(this.#pointsListComponent);
     remove(this.#emptyListMessageComponent);
+    remove(this.#loadingMessageComponent);
   }
 
   createNewPoint() {
@@ -135,6 +146,10 @@ export default class PointsBoardPresenter {
     this.#newPointPresenter.destroy();
   };
 
+  #renderLoadingMessage() {
+    render(this.#loadingMessageComponent, this.#pointsBoardContainer);
+  }
+
   #renderEmptyListMessage() {
     render(this.#emptyListMessageComponent, this.#pointsBoardContainer);
   }
@@ -165,6 +180,11 @@ export default class PointsBoardPresenter {
   }
 
   #renderPointsBoard() {
+    if (this.#isLoading) {
+      this.#renderLoadingMessage();
+      return;
+    }
+
     if (!this.#points.length) {
       this.#renderEmptyListMessage();
       return;

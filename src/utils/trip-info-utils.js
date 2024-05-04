@@ -27,9 +27,16 @@ const getTripCost = (points, offerPack) => {
       sum += addedPrice;
     }
     const offersPack = offerPack[formatToScreamingSnakeCase(point.type)];
+
+    if (!offersPack) {
+      return;
+    }
+
     point.offers.forEach((currentOfferId) => {
       const currentOffer = offersPack.find((offer) => currentOfferId === offer.id);
-      sum += currentOffer.price;
+      if (currentOffer) {
+        sum += currentOffer.price;
+      }
     });
   });
 
