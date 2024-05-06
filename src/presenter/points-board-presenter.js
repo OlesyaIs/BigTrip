@@ -107,6 +107,28 @@ export default class PointsBoardPresenter {
     this.#newPointPresenter.init();
   }
 
+  setSaving(point) {
+    if (point.id) {
+      this.#pointPresenters.get(point.id).setSaving();
+      return;
+    }
+
+    this.#newPointPresenter.setSaving();
+  }
+
+  setDeleting(point) {
+    this.#pointPresenters.get(point.id).setDeleting();
+  }
+
+  setAborting(point) {
+    if (point.id) {
+      this.#pointPresenters.get(point.id).setAborting();
+      return;
+    }
+
+    this.#newPointPresenter.setAborting();
+  }
+
   #clearPointsList() {
     this.#pointPresenters.forEach((pointPresenter) => pointPresenter.destroy());
     this.#pointPresenters.clear();

@@ -103,6 +103,40 @@ export default class PointPresenter {
     }
   }
 
+  setSaving() {
+    if (!(this.#mode === Mode.EDITING)) {
+      return;
+    }
+
+    this.#pointEditComponent.updateElement({
+      isDisable: true,
+      isSaving: true
+    });
+  }
+
+  setDeleting() {
+    if (!(this.#mode === Mode.EDITING)) {
+      return;
+    }
+
+    this.#pointEditComponent.updateElement({
+      isDisable: true,
+      isDeleting: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisable: false,
+        isDeleting: false,
+        isSaving: false
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
+
   #replacePointToEditPoint() {
     replace(this.#pointEditComponent, this.#pointComponent);
     document.addEventListener('keydown', this.#onEscKeydown);

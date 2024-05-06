@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { isEscKeydown } from '../utils/common-utils.js';
 import { render, remove, RenderPosition } from '../framework/render';
 import { PointEditMode, UpdateType, UserAction } from '../const';
@@ -75,6 +74,25 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
+  setSaving() {
+    this.#pointEditComponent.updateElement({
+      isDisable: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisable: false,
+        isDeleting: false,
+        isSaving: false
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
+
   #handleNewPointDestroy() {
     this.#handleDestroy();
   }
@@ -95,9 +113,9 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.BOARD_WITH_INFO,
-      {...point, id: nanoid()}
+      {...point}
     );
-    this.#handleNewPointDestroy();
+    // this.#handleNewPointDestroy();
   };
 
   #handleCancelClick = () => {
