@@ -12,14 +12,13 @@ const createEmptyPoint = (typePack) => {
   const defaultType = Object.values(typePack)[0].type;
 
   return {
-    id: '',
     type: defaultType,
     dateFrom: null,
     dateTo: null,
     destination: null,
     basePrice: '',
     offers: [],
-    isFavourite: false,
+    isFavorite: false,
   };
 };
 

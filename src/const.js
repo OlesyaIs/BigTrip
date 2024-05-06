@@ -145,10 +145,17 @@ const UpdateType = {
 
 const Method = {
   GET: 'GET',
-  PUT: 'PUT'
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
-const END_POINT = 'https://20.objects.htmlacademy.pro/big-trip';
+const EndPoint = {
+  BASE: 'https://20.objects.htmlacademy.pro/big-trip',
+  POINTS: 'points',
+  DESTINATIONS: 'destinations',
+  OFFERS: 'offers'
+};
 
 export {
   ButtonFavoriteClassName,
@@ -171,5 +178,5 @@ export {
   UserAction,
   UpdateType,
   Method,
-  END_POINT
+  EndPoint
 };

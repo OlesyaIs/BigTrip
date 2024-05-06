@@ -1,18 +1,29 @@
 import ApiService from './framework/api-service.js';
-import { Method } from './const.js';
+import { Method, EndPoint } from './const.js';
 import { formatToKebabCase } from './utils/common-utils.js';
 
 export default class TripApiService extends ApiService {
 
   get points() {
-    return this._load({url: 'points'})
+    return this._load({url: EndPoint.POINTS})
       .then(ApiService.parseResponse)
       .then((points) => points.map((point) => this.#adaptPointToClient(point)));
   }
 
+  get destinations() {
+    return this._load({url: EndPoint.DESTINATIONS})
+      .then(ApiService.parseResponse);
+  }
+
+  get offerPack() {
+    return this._load({url: EndPoint.OFFERS})
+      .then(ApiService.parseResponse)
+      .then((offers) => this.#adaptOffersToClient(offers));
+  }
+
   async updatePoint(point) {
     const response = await this._load({
-      url: `points/${point.id}`,
+      url: `${EndPoint.POINTS}/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(this.#adaptPointToServer(point)),
       headers: new Headers({'Content-Type': 'application/json'})
@@ -23,15 +34,27 @@ export default class TripApiService extends ApiService {
     return adaptedResponse;
   }
 
-  get destinations() {
-    return this._load({url: 'destinations'})
-      .then(ApiService.parseResponse);
+  async addPoint(point) {
+    const response = await this._load({
+      url: EndPoint.POINTS,
+      method: Method.POST,
+      body: JSON.stringify(this.#adaptPointToServer(point)),
+      headers: new Headers({'Content-Type': 'application/json'})
+    });
+
+    const parsedResponse = await ApiService.parseResponse(response);
+    const adaptedResponse = this.#adaptPointToClient(parsedResponse);
+
+    return adaptedResponse;
   }
 
-  get offerPack() {
-    return this._load({url: 'offers'})
-      .then(ApiService.parseResponse)
-      .then((offers) => this.#adaptOffersToClient(offers));
+  async deletePoint(point) {
+    const response = await this._load({
+      url: `${EndPoint.POINTS}/${point.id}`,
+      method: Method.DELETE,
+    });
+
+    return response;
   }
 
   #adaptPointToServer(point) {

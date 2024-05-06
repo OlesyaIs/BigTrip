@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { isEscKeydown } from '../utils/common-utils.js';
 import { render, remove, RenderPosition } from '../framework/render';
 import { PointEditMode, UpdateType, UserAction } from '../const';
@@ -95,7 +94,7 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.BOARD_WITH_INFO,
-      {...point, id: nanoid()}
+      {...point}
     );
     this.#handleNewPointDestroy();
   };

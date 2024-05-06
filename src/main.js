@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import TripApiService from './trip-api-service.js';
-import { END_POINT } from './const.js';
+import { EndPoint } from './const.js';
 
 import TripPresenter from './presenter/trip-presenter.js';
 import FiltersModel from './model/filters-model.js';
@@ -18,7 +18,7 @@ const authorization = `Basic ${nanoid()}`;
 const filtersModel = new FiltersModel();
 const sortModel = new SortModel();
 const pointsModel = new PointsModel({
-  tripApiService: new TripApiService(END_POINT, authorization)
+  tripApiService: new TripApiService(EndPoint.BASE, authorization)
 });
 
 const tripPresenter = new TripPresenter({
