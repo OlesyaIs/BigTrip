@@ -23,23 +23,23 @@ const createEmptyPoint = (typePack) => {
 };
 
 const createTypeItemTemplate = (pointType, currentType) => {
-  const checkedAttribute = (currentType === pointType) ? ' checked' : '';
+  const checkedAttribute = (currentType === pointType) ? 'checked' : '';
 
   return (
     `<div class="event__type-item">
-    <input id="event-type-${currentType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${currentType}"${checkedAttribute}>
+    <input id="event-type-${currentType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${currentType}" ${checkedAttribute}>
     <label class="event__type-label  event__type-label--${currentType}" for="event-type-${currentType}-1">${getStringWithUpperCaseFirst(currentType)}</label>
   </div>`
   );
 };
 
-const createTypeTemplate = (point, types) => (
+const createTypeTemplate = (disabledAttribute, point, types) => (
   `<div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
       <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type}.png" alt="Event type icon">
     </label>
-    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${disabledAttribute}>
     <div class="event__type-list">
     <fieldset class="event__type-group">
       <legend class="visually-hidden">Event type</legend>
@@ -50,49 +50,69 @@ const createTypeTemplate = (point, types) => (
   </div>`
 );
 
-const createDestinationWithTypeTemplate = (point, destinations, currentDestination) => (
+const createDestinationWithTypeTemplate = (disabledAttribute, point, destinations, currentDestination) => (
   `<div class="event__field-group  event__field-group--destination">
     <label class="event__label  event__type-output" for="event-destination-1">
       ${getStringWithUpperCaseFirst(point.type)}
     </label>
-    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1" required data-pristine-required-message="Необходимо выбрать пункт назчачения">`}
+    ${`<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? currentDestination.name : ''}" list="destination-list-1" required data-pristine-required-message="Необходимо выбрать пункт назчачения" ${disabledAttribute}>`}
     ${`<datalist id="destination-list-1">
         ${destinations.map((element) => `<option value="${element.name}"></option>`).join('')}
       </datalist>`}
   </div>`
 );
 
-const createTimeTemplate = (point) => {
+const createTimeTemplate = (disabledAttribute, point) => {
   const startDate = point.dateFrom ? huminizeFullDate(point.dateFrom) : '';
   const endDate = point.dateTo ? huminizeFullDate(point.dateTo) : '';
 
   return (
     `<div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-1">From</label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startDate}">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startDate}" ${disabledAttribute}>
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">To</label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endDate}">
+      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endDate}" ${disabledAttribute}>
     </div>`
   );
 };
 
-const createPriceTemplate = ({basePrice}) => (
+const createPriceTemplate = (disabledAttribute, basePrice) => (
   `<div class="event__field-group  event__field-group--price">
     <label class="event__label" for="event-price-1">
       <span class="visually-hidden">Price</span>
       &euro;
     </label>
-    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}" pattern="/(^[0-9]+$)/" required data-pristine-required-message="Необходимо указать стоимость" data-pristine-pattern-message="Необходимо ввести целое положительное число">
+    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}" pattern="/(^[0-9]+$)/" required data-pristine-required-message="Необходимо указать стоимость" data-pristine-pattern-message="Необходимо ввести целое положительное число" ${disabledAttribute}>
   </div>`
 );
 
-const createOfferTemplate = (offer, isChecked) => {
-  const checkedAttribute = isChecked ? ' checked' : '';
+const createButtonsTemplate = (disabledAttribute, isDeleting, isSaving, mode) => {
+  let resetButtonTemplate = '';
+  let rollupButtonTemplate = '';
+
+  switch (mode) {
+    case PointEditMode.ADD:
+      resetButtonTemplate = `<button class="event__reset-btn" type="reset" ${disabledAttribute}>Cancel</button>`;
+      break;
+    case PointEditMode.EDIT:
+      resetButtonTemplate = `<button class="event__reset-btn" type="reset" ${disabledAttribute}>${isDeleting ? 'Deleting...' : 'Delete'}</button>`;
+      rollupButtonTemplate = `<button class="event__rollup-btn" type="button" ${disabledAttribute}><span class="visually-hidden">Open event</span></button>`;
+      break;
+  }
+  return (
+    `<button class="event__save-btn  btn  btn--blue" type="submit" ${disabledAttribute}>${isSaving ? 'Saving...' : 'Save'}</button>
+    ${resetButtonTemplate}
+    ${rollupButtonTemplate}`
+  );
+};
+
+const createOfferTemplate = (disabledAttribute, offer, isChecked) => {
+  const checkedAttribute = isChecked ? 'checked' : '';
 
   return (
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.shortTitle}-1" type="checkbox" name="event-offer-${offer.shortTitle}" data-offer-id="${offer.id}"${checkedAttribute}>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.shortTitle}-1" type="checkbox" name="event-offer-${offer.shortTitle}" data-offer-id="${offer.id}" ${checkedAttribute} ${disabledAttribute}>
       <label class="event__offer-label" for="event-offer-${offer.shortTitle}-1">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -102,7 +122,7 @@ const createOfferTemplate = (offer, isChecked) => {
   );
 };
 
-const createOffersTemplate = (point, offers = []) => {
+const createOffersTemplate = (disabledAttribute, point, offers = []) => {
   if (!offers.length) {
     return '';
   }
@@ -111,7 +131,7 @@ const createOffersTemplate = (point, offers = []) => {
 
   const offersList = offers.map((offer) => {
     const isChecked = checkedOffersIds ? checkedOffersIds.some((checkedOfferId) => checkedOfferId === offer.id) : false;
-    return createOfferTemplate(offer, isChecked);
+    return createOfferTemplate(disabledAttribute, offer, isChecked);
   }).join('');
 
   return (
@@ -153,43 +173,24 @@ const createDestinationInfoTemplate = (currentDestination) => {
     </section>`
   );
 };
-const createButtonsTemplate = (mode) => {
-  let resetButtonTemplate = '';
-  let rollupButtonTemplate = '';
-
-  switch (mode) {
-    case PointEditMode.ADD:
-      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Cancel</button>';
-      break;
-    case PointEditMode.EDIT:
-      resetButtonTemplate = '<button class="event__reset-btn" type="reset">Delete</button>';
-      rollupButtonTemplate = '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>';
-      break;
-  }
-  return (
-    `<button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-    ${resetButtonTemplate}
-    ${rollupButtonTemplate}`
-  );
-};
 
 const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint, mode) => {
-  const editedPoint = currentPoint;
   const types = Object.values(typePack).map((element) => element.type);
-  const keyType = formatToScreamingSnakeCase(editedPoint.type);
-  const currentDestination = destinations.find((destination) => destination.id === editedPoint.destination);
+  const keyType = formatToScreamingSnakeCase(currentPoint.type);
+  const currentDestination = destinations.find((destination) => destination.id === currentPoint.destination);
+  const disabledAttribute = currentPoint.isDisable ? 'disabled' : '';
 
   return (
     `<form class="event event--edit" action="#" method="post">
       <header class="event__header">
-        ${createTypeTemplate(editedPoint, types)}
-        ${createDestinationWithTypeTemplate(editedPoint, destinations, currentDestination)}
-        ${createTimeTemplate(editedPoint)}
-        ${createPriceTemplate(editedPoint)}
-        ${createButtonsTemplate(mode)}
+        ${createTypeTemplate(disabledAttribute, currentPoint, types)}
+        ${createDestinationWithTypeTemplate(disabledAttribute, currentPoint, destinations, currentDestination)}
+        ${createTimeTemplate(disabledAttribute, currentPoint)}
+        ${createPriceTemplate(disabledAttribute, currentPoint.basePrice)}
+        ${createButtonsTemplate(disabledAttribute, currentPoint.isDeleting, currentPoint.isSaving, mode)}
       </header>
       <section class="event__details">
-        ${createOffersTemplate(editedPoint, offerPack[keyType])}
+        ${createOffersTemplate(disabledAttribute, currentPoint, offerPack[keyType])}
         ${createDestinationInfoTemplate(currentDestination)}
       </section>
     </form>`
@@ -212,7 +213,18 @@ export default class PointEditView extends AbstractStatefulView {
   #datePickerFrom = null;
   #datePickerTo = null;
 
-  constructor({typePack, destinations, offerPack, currentPoint, onSubmit, onReturnClick, onDeleteClick, onUpdateElement, onPriceInput, mode}) {
+  constructor({
+    typePack,
+    destinations,
+    offerPack,
+    currentPoint,
+    onSubmit,
+    onReturnClick,
+    onDeleteClick,
+    onUpdateElement,
+    onPriceInput,
+    mode
+  }) {
     super();
 
     this.#typePack = typePack;
@@ -236,11 +248,19 @@ export default class PointEditView extends AbstractStatefulView {
   }
 
   static parsePointToState(point) {
-    return structuredClone(point);
+    const state = structuredClone(point);
+    state.isDisable = false;
+    state.isSaving = false;
+    state.isDeleting = false;
+    return state;
   }
 
   static parseStateToPoint(state) {
-    return structuredClone(state);
+    const point = structuredClone(state);
+    delete point.isDisable;
+    delete point.isSaving;
+    delete point.isDeleting;
+    return point;
   }
 
   updateElement(update) {

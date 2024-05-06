@@ -157,6 +157,11 @@ const EndPoint = {
   OFFERS: 'offers'
 };
 
+const UiBlockerTime = {
+  LOWERLIMIT: 350,
+  UPPERLIMIT: 1000,
+};
+
 export {
   ButtonFavoriteClassName,
   EditValidatorSettingClassName,
@@ -178,5 +183,6 @@ export {
   UserAction,
   UpdateType,
   Method,
-  EndPoint
+  EndPoint,
+  UiBlockerTime
 };

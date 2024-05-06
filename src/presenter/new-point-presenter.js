@@ -74,6 +74,25 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
+  setSaving() {
+    this.#pointEditComponent.updateElement({
+      isDisable: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisable: false,
+        isDeleting: false,
+        isSaving: false
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
+
   #handleNewPointDestroy() {
     this.#handleDestroy();
   }
@@ -96,7 +115,7 @@ export default class NewPointPresenter {
       UpdateType.BOARD_WITH_INFO,
       {...point}
     );
-    this.#handleNewPointDestroy();
+    // this.#handleNewPointDestroy();
   };
 
   #handleCancelClick = () => {
