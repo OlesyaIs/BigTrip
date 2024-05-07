@@ -36,7 +36,7 @@ export default class PointValidator {
       false
     );
 
-    this.addValidator(this.#destinationInput, this.#validateDestination, ValidateErrorMessage.INKNOWN_DESTINATION);
+    this.addValidator(this.#destinationInput, this.#validateDestination, ValidateErrorMessage.UNKNOWN_DESTINATION);
     this.#dateInputs.forEach((dateInput) => this.addValidator(dateInput, this.#validateDate, ValidateErrorMessage.REQUIRE_DATE));
 
   }

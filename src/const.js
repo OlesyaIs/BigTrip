@@ -125,7 +125,7 @@ const ResetEditPointMode = {
 
 const ValidateErrorMessage = {
   REQUIRE_DATE: 'Необходимо заполнить дату',
-  INKNOWN_DESTINATION: 'Необходимо выбрать пункт из списка'
+  UNKNOWN_DESTINATION: 'Необходимо выбрать пункт из списка'
 };
 
 const UserAction = {
