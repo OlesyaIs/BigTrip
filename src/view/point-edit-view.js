@@ -9,7 +9,7 @@ import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const createEmptyPoint = (typePack) => {
-  const defaultType = Object.values(typePack)[0].type;
+  const defaultType = Object.values(typePack)[0];
 
   return {
     type: defaultType,
@@ -175,7 +175,7 @@ const createDestinationInfoTemplate = (currentDestination) => {
 };
 
 const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint, mode) => {
-  const types = Object.values(typePack).map((element) => element.type);
+  const types = Object.values(typePack);
   const keyType = formatToScreamingSnakeCase(currentPoint.type);
   const currentDestination = destinations.find((destination) => destination.id === currentPoint.destination);
   const disabledAttribute = currentPoint.isDisable ? 'disabled' : '';
@@ -338,11 +338,9 @@ export default class PointEditView extends AbstractStatefulView {
     if (this._state.type === newType) {
       return;
     }
-    // const newTypeKey = formatToScreamingSnakeCase(newType);
 
     this.updateElement({
       type: newType,
-      basePrice: '',
       offers: [],
     });
   };
