@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
+import { getInteger, getStringWithUpperCaseFirst, formatToScreamingSnakeCase } from '../utils/common-utils.js';
 import { huminizeFullDate } from '../utils/date-utils.js';
 import { ResetEditPointMode, FLATPICKR_DATE_FORMAT, PointEditMode } from '../const.js';
 
@@ -338,11 +338,11 @@ export default class PointEditView extends AbstractStatefulView {
     if (this._state.type === newType) {
       return;
     }
-    const newTypeKey = formatToScreamingSnakeCase(newType);
+    // const newTypeKey = formatToScreamingSnakeCase(newType);
 
     this.updateElement({
       type: newType,
-      basePrice: this.#typePack[newTypeKey].price,
+      basePrice: '',
       offers: [],
     });
   };
@@ -369,7 +369,7 @@ export default class PointEditView extends AbstractStatefulView {
   #onPriceChange = (evt) => {
     evt.preventDefault();
     this._setState({
-      basePrice: evt.target.value
+      basePrice: getInteger(evt.target.value),
     });
   };
 
