@@ -112,10 +112,9 @@ export default class NewPointPresenter {
 
     this.#handleDataChange(
       UserAction.ADD_POINT,
-      UpdateType.BOARD_WITH_INFO,
+      UpdateType.FULL,
       {...point}
     );
-    // this.#handleNewPointDestroy();
   };
 
   #handleCancelClick = () => {

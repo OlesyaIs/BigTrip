@@ -1,4 +1,4 @@
-import { filterFunction } from '../utils/filter-utils.js';
+import { filterFunction, getFilterAvailability } from '../utils/filter-utils.js';
 import { UserAction, UpdateType, UiBlockerTime } from '../const.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
@@ -119,7 +119,7 @@ export default class TripPresenter {
         break;
 
       case UpdateType.FILTERS_WITH_BOARD:
-        this.#filtersPresenter.init();
+        this.#filtersPresenter.init({});
         this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
           points: this.filteredPoints,
@@ -127,8 +127,18 @@ export default class TripPresenter {
         });
         break;
 
+      case UpdateType.FULL:
+        this.#tripInfoPresenter.init({points: this.points});
+        this.#filtersPresenter.init({filterAvailability: getFilterAvailability(this.filters, this.points)});
+        this.#pointsBoardPresenter.destroy();
+        this.#pointsBoardPresenter.init({
+          points: this.filteredPoints
+        });
+        break;
+
       case UpdateType.INIT:
         this.#tripInfoPresenter.init({points: this.points});
+        this.#filtersPresenter.init({filterAvailability: getFilterAvailability(this.filters, this.points)});
         this.#pointsBoardPresenter.destroy();
         this.#pointsBoardPresenter.init({
           points: this.filteredPoints,
@@ -171,7 +181,7 @@ export default class TripPresenter {
       onFilterChange: this.#handleFilterChange,
     });
 
-    this.#filtersPresenter.init();
+    this.#filtersPresenter.init({filterAvailability: getFilterAvailability(this.filters, this.points)});
   }
 
   #renderPointsBoard(container) {

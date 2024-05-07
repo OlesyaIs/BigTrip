@@ -174,7 +174,7 @@ export default class PointPresenter {
 
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      UpdateType.BOARD_WITH_INFO,
+      UpdateType.FULL,
       point
     );
   };
@@ -195,7 +195,7 @@ export default class PointPresenter {
   #handleDeleteClick = (point) => {
     this.#handleDataChange(
       UserAction.DELETE_POINT,
-      UpdateType.BOARD_WITH_INFO,
+      UpdateType.FULL,
       point
     );
   };

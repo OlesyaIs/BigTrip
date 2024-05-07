@@ -20,4 +20,24 @@ const filterFunction = {
   },
 };
 
-export { filterFunction };
+const getFilterAvailability = (filters, points) => {
+  const filterAvailability = {};
+
+  filters.forEach((filter) => {
+    filterAvailability[filter] = false;
+
+    if (filter === FilterType.EVERYTHING) {
+      filterAvailability[filter] = true;
+      return;
+    }
+
+    const filteredPoint = filterFunction[filter](points);
+    if (filteredPoint.length > 0) {
+      filterAvailability[filter] = true;
+    }
+  });
+
+  return filterAvailability;
+};
+
+export { filterFunction, getFilterAvailability };
