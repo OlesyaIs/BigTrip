@@ -135,6 +135,11 @@ const UiBlockerTime = {
   UPPERLIMIT: 1000,
 };
 
+const BlockAction = {
+  BLOCK: 'BLOCK',
+  UNBLOCK: 'UNBLOCK'
+};
+
 export {
   ButtonFavoriteClassName,
   EditValidatorSettingClassName,
@@ -157,5 +162,6 @@ export {
   UpdateType,
   Method,
   EndPoint,
-  UiBlockerTime
+  UiBlockerTime,
+  BlockAction
 };

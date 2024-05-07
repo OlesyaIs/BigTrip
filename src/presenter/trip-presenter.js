@@ -1,5 +1,5 @@
 import { filterFunction, getFilterAvailability } from '../utils/filter-utils.js';
-import { UserAction, UpdateType, UiBlockerTime } from '../const.js';
+import { UserAction, UpdateType, UiBlockerTime, BlockAction } from '../const.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 import TripInfoPresenter from './trip-info-presenter.js';
@@ -64,6 +64,17 @@ export default class TripPresenter {
     this.#addNewPointButtonElement.addEventListener('click', this.#onAddNewPointClick);
   }
 
+  #setAddNewPointButtonState(action = BlockAction.UNBLOCK) {
+    switch (action) {
+      case BlockAction.BLOCK:
+        this.#addNewPointButtonElement.disabled = true;
+        break;
+      case BlockAction.UNBLOCK:
+        this.#addNewPointButtonElement.disabled = false;
+        break;
+    }
+  }
+
   #handleViewAction = async (actionType, updateType, update) => {
     this.#uiblocker.block();
 
@@ -100,7 +111,7 @@ export default class TripPresenter {
   };
 
   #handleModelEvent = (updateType) => {
-    this.#addNewPointButtonElement.disabled = false;
+    this.#setAddNewPointButtonState();
 
     switch (updateType) {
       case UpdateType.BOARD:
@@ -156,13 +167,11 @@ export default class TripPresenter {
     this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
     this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, this.#filtersModel.defaultFilter);
     this.#pointsBoardPresenter.createNewPoint();
-    this.#addNewPointButtonElement.disabled = true;
+    this.#setAddNewPointButtonState(BlockAction.BLOCK);
   };
 
   #handleNewPointDestroy = () => {
-    this.#pointsBoardPresenter.destroy();
-    this.#pointsBoardPresenter.init({points: this.filteredPoints});
-    this.#addNewPointButtonElement.disabled = false;
+    this.#setAddNewPointButtonState();
   };
 
   #renderTripInfo(container) {

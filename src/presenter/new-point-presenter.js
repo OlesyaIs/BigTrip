@@ -72,6 +72,8 @@ export default class NewPointPresenter {
     this.#pointEditComponent = null;
     this.#pointItemComponent = null;
     document.removeEventListener('keydown', this.#onEscKeydown);
+
+    this.#handleDestroy();
   }
 
   setSaving() {
@@ -93,9 +95,9 @@ export default class NewPointPresenter {
     this.#pointEditComponent.shake(resetFormState);
   }
 
-  #handleNewPointDestroy() {
-    this.#handleDestroy();
-  }
+  // #handleNewPointDestroy() {
+  //   this.#handleDestroy();
+  // }
 
   #handleUpdateElement = () => {
     this.#formValidator.destroy();
@@ -118,7 +120,7 @@ export default class NewPointPresenter {
   };
 
   #handleCancelClick = () => {
-    this.#handleNewPointDestroy();
+    this.destroy();
   };
 
   #handlePriceInput = () => {
@@ -131,6 +133,6 @@ export default class NewPointPresenter {
     }
 
     evt.preventDefault();
-    this.#handleNewPointDestroy();
+    this.destroy();
   };
 }
