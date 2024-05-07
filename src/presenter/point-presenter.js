@@ -38,13 +38,11 @@ export default class PointPresenter {
     return {...this.#pointsModel.offerPack};
   }
 
-  get typePack() {
-    return {...this.#pointsModel.typePack};
+  get pointsType() {
+    return {...this.#pointsModel.pointsType};
   }
 
-  init({
-    point,
-  }) {
+  init({point}) {
     this.#point = point;
 
     const prevPointComponent = this.#pointComponent;
@@ -64,7 +62,7 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new PointEditView({
       mode: PointEditMode.EDIT,
-      typePack: this.typePack,
+      pointsType: this.pointsType,
       destinations: this.destinations,
       offerPack: this.offerPack,
       currentPoint: this.#point,

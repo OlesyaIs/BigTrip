@@ -33,15 +33,15 @@ export default class NewPointPresenter {
     return {...this.#pointsModel.offerPack};
   }
 
-  get typePack() {
-    return {...this.#pointsModel.typePack};
+  get pointsType() {
+    return {...this.#pointsModel.pointsType};
   }
 
   init() {
     this.#pointItemComponent = new PointItemView();
     this.#pointEditComponent = new PointEditView({
       mode: PointEditMode.ADD,
-      typePack: this.typePack,
+      pointsType: this.pointsType,
       destinations: this.destinations,
       offerPack: this.offerPack,
       onSubmit: this.#handleFormSubmit,
@@ -94,10 +94,6 @@ export default class NewPointPresenter {
 
     this.#pointEditComponent.shake(resetFormState);
   }
-
-  // #handleNewPointDestroy() {
-  //   this.#handleDestroy();
-  // }
 
   #handleUpdateElement = () => {
     this.#formValidator.destroy();

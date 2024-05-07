@@ -4,6 +4,7 @@ const FULL_DATE_FORMAT = 'DD/MM/YY HH:mm';
 const DAY_MONTH_FORMAT = 'DD MMM';
 const DAY_ONLY_FORMAT = 'DD';
 const FLATPICKR_DATE_FORMAT = 'd/m/y H:i';
+const HYPHEN_OR_WHITESPACE_REGEXP = /[-|\s]+/g;
 
 const ButtonFavoriteClassName = {
   BASE: 'event__favorite-btn',
@@ -18,8 +19,8 @@ const EditValidatorSettingClassName = {
 const EditPointInputId = {
   DESTINATION: 'event-destination-1',
   PRICE: 'event-price-1',
-  STARTTIME: 'event-start-time-1',
-  ENDTIME: 'event-end-time-1'
+  START_TIME: 'event-start-time-1',
+  END_TIME: 'event-end-time-1'
 };
 
 const FilterType = {
@@ -36,7 +37,7 @@ const EmptyListMessage = {
   [FilterType.PAST]: 'There are no past events now',
 };
 
-const TypePack = {
+const PointsType = {
   TAXI: 'taxi',
   BUS: 'bus',
   TRAIN: 'train',
@@ -79,6 +80,11 @@ const SortType = {
     isDefault: false,
     isDisabled: true,
   }
+};
+
+const BlockAction = {
+  BLOCK: 'BLOCK',
+  UNBLOCK: 'UNBLOCK'
 };
 
 const Mode = {
@@ -135,33 +141,29 @@ const UiBlockerTime = {
   UPPERLIMIT: 1000,
 };
 
-const BlockAction = {
-  BLOCK: 'BLOCK',
-  UNBLOCK: 'UNBLOCK'
-};
-
 export {
-  ButtonFavoriteClassName,
-  EditValidatorSettingClassName,
-  EditPointInputId,
-  ValidateErrorMessage,
-  FilterType,
-  TypePack,
-  SortType,
-  EmptyListMessage,
-  Mode,
-  PointEditMode,
-  ResetEditPointMode,
   TIME_FORMAT,
   SHORT_DATE_FORMAT,
   FULL_DATE_FORMAT,
   DAY_MONTH_FORMAT,
   DAY_ONLY_FORMAT,
   FLATPICKR_DATE_FORMAT,
+  HYPHEN_OR_WHITESPACE_REGEXP,
+  ButtonFavoriteClassName,
+  EditValidatorSettingClassName,
+  EditPointInputId,
+  FilterType,
+  EmptyListMessage,
+  PointsType,
+  SortType,
+  BlockAction,
+  Mode,
+  PointEditMode,
+  ResetEditPointMode,
+  ValidateErrorMessage,
   UserAction,
   UpdateType,
   Method,
   EndPoint,
-  UiBlockerTime,
-  BlockAction
+  UiBlockerTime
 };

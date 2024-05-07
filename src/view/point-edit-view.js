@@ -8,8 +8,8 @@ import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
-const createEmptyPoint = (typePack) => {
-  const defaultType = Object.values(typePack)[0];
+const createEmptyPoint = (pointsType) => {
+  const defaultType = Object.values(pointsType)[0];
 
   return {
     type: defaultType,
@@ -174,8 +174,8 @@ const createDestinationInfoTemplate = (currentDestination) => {
   );
 };
 
-const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint, mode) => {
-  const types = Object.values(typePack);
+const createPointEditTemplate = (pointsType, destinations, offerPack, currentPoint, mode) => {
+  const types = Object.values(pointsType);
   const keyType = formatToScreamingSnakeCase(currentPoint.type);
   const currentDestination = destinations.find((destination) => destination.id === currentPoint.destination);
   const disabledAttribute = currentPoint.isDisable ? 'disabled' : '';
@@ -198,7 +198,7 @@ const createPointEditTemplate = (typePack, destinations, offerPack, currentPoint
 };
 
 export default class PointEditView extends AbstractStatefulView {
-  #typePack = null;
+  #pointsType = null;
   #destinations = null;
   #offerPack = null;
   #handleSubmit = null;
@@ -214,7 +214,7 @@ export default class PointEditView extends AbstractStatefulView {
   #datePickerTo = null;
 
   constructor({
-    typePack,
+    pointsType,
     destinations,
     offerPack,
     currentPoint,
@@ -227,7 +227,7 @@ export default class PointEditView extends AbstractStatefulView {
   }) {
     super();
 
-    this.#typePack = typePack;
+    this.#pointsType = pointsType;
     this.#destinations = destinations;
     this.#offerPack = offerPack;
     this.#handleSubmit = onSubmit;
@@ -236,7 +236,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.#handleUpdateElement = onUpdateElement;
     this.#handlePriceInput = onPriceInput;
 
-    this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#typePack);
+    this.#point = currentPoint ? currentPoint : createEmptyPoint(this.#pointsType);
     this.#mode = mode;
     this._setState(PointEditView.parsePointToState(this.#point));
 
@@ -244,23 +244,7 @@ export default class PointEditView extends AbstractStatefulView {
   }
 
   get template() {
-    return createPointEditTemplate(this.#typePack, this.#destinations, this.#offerPack, this._state, this.#mode);
-  }
-
-  static parsePointToState(point) {
-    const state = structuredClone(point);
-    state.isDisable = false;
-    state.isSaving = false;
-    state.isDeleting = false;
-    return state;
-  }
-
-  static parseStateToPoint(state) {
-    const point = structuredClone(state);
-    delete point.isDisable;
-    delete point.isSaving;
-    delete point.isDeleting;
-    return point;
+    return createPointEditTemplate(this.#pointsType, this.#destinations, this.#offerPack, this._state, this.#mode);
   }
 
   updateElement(update) {
@@ -294,6 +278,28 @@ export default class PointEditView extends AbstractStatefulView {
       this.#datePickerTo.destroy();
       this.#datePickerTo = null;
     }
+  }
+
+  #setDatePicker() {
+
+    this.#datePickerFrom = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        dateFormat: FLATPICKR_DATE_FORMAT,
+        onChange: this.#onDateFromChange,
+      }
+    );
+
+    this.#datePickerTo = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        dateFormat: FLATPICKR_DATE_FORMAT,
+        onChange: this.#onDateToChange,
+        minDate: this.#datePickerFrom.parseDate(this.element.querySelector('#event-start-time-1').value),
+      }
+    );
   }
 
   _restoreHandlers() {
@@ -401,25 +407,19 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  #setDatePicker() {
+  static parsePointToState(point) {
+    const state = structuredClone(point);
+    state.isDisable = false;
+    state.isSaving = false;
+    state.isDeleting = false;
+    return state;
+  }
 
-    this.#datePickerFrom = flatpickr(
-      this.element.querySelector('#event-start-time-1'),
-      {
-        enableTime: true,
-        dateFormat: FLATPICKR_DATE_FORMAT,
-        onChange: this.#onDateFromChange,
-      }
-    );
-
-    this.#datePickerTo = flatpickr(
-      this.element.querySelector('#event-end-time-1'),
-      {
-        enableTime: true,
-        dateFormat: FLATPICKR_DATE_FORMAT,
-        onChange: this.#onDateToChange,
-        minDate: this.#datePickerFrom.parseDate(this.element.querySelector('#event-start-time-1').value),
-      }
-    );
+  static parseStateToPoint(state) {
+    const point = structuredClone(state);
+    delete point.isDisable;
+    delete point.isSaving;
+    delete point.isDeleting;
+    return point;
   }
 }

@@ -4,10 +4,10 @@ import { UpdateType } from '../const.js';
 
 import SortView from '../view/sort-view.js';
 import PointsListView from '../view/points-list-view.js';
+import LoadingView from '../view/loading-view.js';
 import EmptyListMessageView from '../view/empty-list-message-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
-import LoadingView from '../view/loading-view.js';
 
 export default class PointsBoardPresenter {
   #pointsModel = null;
@@ -40,18 +40,6 @@ export default class PointsBoardPresenter {
 
     this.#sortModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
-  }
-
-  get destinations() {
-    return [...this.#pointsModel.destinations];
-  }
-
-  get offerPack() {
-    return {...this.#pointsModel.offerPack};
-  }
-
-  get typePack() {
-    return {...this.#pointsModel.typePack};
   }
 
   get sortTypePack() {
@@ -147,27 +135,6 @@ export default class PointsBoardPresenter {
     }
   };
 
-  #handleModelEvent = (updateType, data) => {
-    if (updateType !== UpdateType.POINT) {
-      return;
-    }
-
-    this.#pointPresenters.get(data.id).init({point: data});
-  };
-
-  #handleSortTypeChange = (sortType) => {
-    if (sortType === this.#sortModel.currentSortType) {
-      return;
-    }
-
-    this.#sortModel.setCurrentSortType(UpdateType.BOARD, sortType);
-  };
-
-  #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
-    this.#newPointPresenter.destroy();
-  };
-
   #renderLoadingMessage() {
     render(this.#loadingMessageComponent, this.#pointsBoardContainer);
   }
@@ -187,9 +154,7 @@ export default class PointsBoardPresenter {
       onDataChange: this.#handleDataChange,
       onModeChange: this.#handleModeChange,
     });
-    pointPresenter.init({
-      point: point,
-    });
+    pointPresenter.init({point});
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
@@ -215,4 +180,25 @@ export default class PointsBoardPresenter {
     this.#renderSort();
     this.#renderPointList();
   }
+
+  #handleModelEvent = (updateType, data) => {
+    if (updateType !== UpdateType.POINT) {
+      return;
+    }
+
+    this.#pointPresenters.get(data.id).init({point: data});
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (sortType === this.#sortModel.currentSortType) {
+      return;
+    }
+
+    this.#sortModel.setCurrentSortType(UpdateType.BOARD, sortType);
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#newPointPresenter.destroy();
+  };
 }

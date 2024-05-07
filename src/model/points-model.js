@@ -1,4 +1,4 @@
-import { TypePack } from '../const.js';
+import { PointsType } from '../const.js';
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../const.js';
 
@@ -7,7 +7,7 @@ export default class PointsModel extends Observable {
   #points = [];
   #destinations = [];
   #offerPack = {};
-  #typePack = structuredClone(TypePack);
+  #pointsType = structuredClone(PointsType);
 
   constructor({tripApiService}) {
     super();
@@ -26,8 +26,8 @@ export default class PointsModel extends Observable {
     return this.#offerPack;
   }
 
-  get typePack() {
-    return this.#typePack;
+  get pointsType() {
+    return this.#pointsType;
   }
 
   async init() {

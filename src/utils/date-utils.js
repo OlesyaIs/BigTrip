@@ -1,6 +1,7 @@
 import { TIME_FORMAT, SHORT_DATE_FORMAT, FULL_DATE_FORMAT, DAY_MONTH_FORMAT, DAY_ONLY_FORMAT } from '../const.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+
 dayjs.extend(duration);
 
 // Get
@@ -8,7 +9,6 @@ const getMonth = (date) => dayjs(date).month();
 const getYear = (date) => dayjs(date).year();
 
 // Date formatting
-
 const formatSomeDate = (date, format) => date ? dayjs(date).format(format ? format : '') : '';
 
 const formatFullDate = (date) => formatSomeDate(date);
@@ -24,6 +24,7 @@ const getDuration = (startDate, endDate) => dayjs.duration(dayjs(endDate).diff(d
 
 // Functions for Difference
 const getDataDifference = (startDate, endDate) => dayjs(endDate).diff(dayjs(startDate));
+
 // const getDataDifferenceInDays = (startDate, endDate) => dayjs(endDate).diff(dayjs(startDate), 'day');
 const getDataDifferenceInDays = (startDate, endDate) => {
   const date1 = dayjs(startDate);

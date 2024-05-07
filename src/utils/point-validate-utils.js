@@ -18,8 +18,8 @@ export default class PointValidator {
     this.#formElement = formElement;
     this.#destinationInput = this.#formElement.querySelector(`#${EditPointInputId.DESTINATION}`);
     this.#priceInput = this.#formElement.querySelector(`#${EditPointInputId.PRICE}`);
-    this.#dateInputs.push(this.#formElement.querySelector(`#${EditPointInputId.STARTTIME}`));
-    this.#dateInputs.push(this.#formElement.querySelector(`#${EditPointInputId.ENDTIME}`));
+    this.#dateInputs.push(this.#formElement.querySelector(`#${EditPointInputId.START_TIME}`));
+    this.#dateInputs.push(this.#formElement.querySelector(`#${EditPointInputId.END_TIME}`));
     this.#inputs = [
       this.#destinationInput,
       this.#priceInput,
@@ -45,11 +45,6 @@ export default class PointValidator {
     this.#pristine.addValidator(element, validateFunction, message, 1, true);
   }
 
-  #validateDestination = (value) => this.#destinations.some((destination) => destination.name === value);
-
-
-  #validateDate = (value) => Boolean(value);
-
   validatePoint() {
     return this.#pristine.validate(this.#inputs);
   }
@@ -67,4 +62,8 @@ export default class PointValidator {
     this.#dateInputs = [];
     this.#inputs = [];
   }
+
+  #validateDestination = (value) => this.#destinations.some((destination) => destination.name === value);
+
+  #validateDate = (value) => Boolean(value);
 }

@@ -13,7 +13,7 @@ export default class TripPresenter {
 
   #destinations = [];
   #offerPack = {};
-  #typePack = {};
+  #pointsType = {};
 
   #tripInfoContainer = null;
   #filterContainer = null;
@@ -58,10 +58,54 @@ export default class TripPresenter {
   init() {
     this.#destinations = [...this.#pointsModel.destinations];
     this.#offerPack = structuredClone(this.#pointsModel.offerPack);
-    this.#typePack = structuredClone(this.#pointsModel.typePack);
+    this.#pointsType = structuredClone(this.#pointsModel.pointsType);
     this.#renderTripBoard();
 
     this.#addNewPointButtonElement.addEventListener('click', this.#onAddNewPointClick);
+  }
+
+  #renderTripInfo(container) {
+    this.#tripInfoPresenter = new TripInfoPresenter({container, pointsModel: this.#pointsModel});
+    this.#tripInfoPresenter.init({
+      points: this.points,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+    });
+  }
+
+  #renderFilters(container) {
+    this.#filtersPresenter = new FiltersPresenter({
+      filtersModel: this.#filtersModel,
+      filtersContainer: container,
+      onFilterChange: this.#handleFilterChange,
+    });
+
+    this.#filtersPresenter.init({filterAvailability: getFilterAvailability(this.filters, this.points)});
+  }
+
+  #renderPointsBoard(container) {
+    this.#pointsBoardPresenter = new PointsBoardPresenter({
+      pointsBoardContainer: container,
+      pointsModel: this.#pointsModel,
+      sortModel: this.#sortModel,
+      onDataChange: this.#handleViewAction,
+      onNewPointDestroy: this.#handleNewPointDestroy
+    });
+
+    this.#pointsBoardPresenter.init({
+      points: this.filteredPoints,
+      destinations: this.#destinations,
+      offerPack: this.#offerPack,
+      pointsType: this.#pointsType,
+      currentFilter: this.#filtersModel.currentFilter,
+
+    });
+  }
+
+  #renderTripBoard() {
+    this.#renderTripInfo(this.#tripInfoContainer);
+    this.#renderFilters(this.#filterContainer);
+    this.#renderPointsBoard(this.#pointsBoardContainer);
   }
 
   #setAddNewPointButtonState(action = BlockAction.UNBLOCK) {
@@ -163,58 +207,14 @@ export default class TripPresenter {
     this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
   };
 
+  #handleNewPointDestroy = () => {
+    this.#setAddNewPointButtonState();
+  };
+
   #onAddNewPointClick = () => {
     this.#sortModel.currentSortType = this.#sortModel.defaultSortType;
     this.#filtersModel.setCurrentFilter(UpdateType.FILTERS_WITH_BOARD, this.#filtersModel.defaultFilter);
     this.#pointsBoardPresenter.createNewPoint();
     this.#setAddNewPointButtonState(BlockAction.BLOCK);
   };
-
-  #handleNewPointDestroy = () => {
-    this.#setAddNewPointButtonState();
-  };
-
-  #renderTripInfo(container) {
-    this.#tripInfoPresenter = new TripInfoPresenter({container, pointsModel: this.#pointsModel});
-    this.#tripInfoPresenter.init({
-      points: this.points,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
-    });
-  }
-
-  #renderFilters(container) {
-    this.#filtersPresenter = new FiltersPresenter({
-      filtersModel: this.#filtersModel,
-      filtersContainer: container,
-      onFilterChange: this.#handleFilterChange,
-    });
-
-    this.#filtersPresenter.init({filterAvailability: getFilterAvailability(this.filters, this.points)});
-  }
-
-  #renderPointsBoard(container) {
-    this.#pointsBoardPresenter = new PointsBoardPresenter({
-      pointsBoardContainer: container,
-      pointsModel: this.#pointsModel,
-      sortModel: this.#sortModel,
-      onDataChange: this.#handleViewAction,
-      onNewPointDestroy: this.#handleNewPointDestroy
-    });
-
-    this.#pointsBoardPresenter.init({
-      points: this.filteredPoints,
-      destinations: this.#destinations,
-      offerPack: this.#offerPack,
-      typePack: this.#typePack,
-      currentFilter: this.#filtersModel.currentFilter,
-
-    });
-  }
-
-  #renderTripBoard() {
-    this.#renderTripInfo(this.#tripInfoContainer);
-    this.#renderFilters(this.#filterContainer);
-    this.#renderPointsBoard(this.#pointsBoardContainer);
-  }
 }
