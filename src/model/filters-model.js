@@ -11,10 +11,6 @@ export default class FiltersModel extends Observable {
     return this.#filters;
   }
 
-  set filters(newFilterPack) {
-    this.#filterPack = newFilterPack;
-  }
-
   get defaultFilter() {
     return this.#defaultFilter;
   }

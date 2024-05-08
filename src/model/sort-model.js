@@ -10,10 +10,6 @@ export default class SortModel extends Observable {
     return this.#sortTypePack;
   }
 
-  set sortTypePack(newSortTypePack) {
-    this.#sortTypePack = newSortTypePack;
-  }
-
   get defaultSortType() {
     return this.#defaultSortType;
   }

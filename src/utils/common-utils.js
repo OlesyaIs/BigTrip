@@ -1,3 +1,5 @@
+import { HYPHEN_OR_WHITESPACE_REGEXP } from '../const.js';
+
 const getInteger = (string) => parseInt(string, 10);
 
 // Functions for String
@@ -9,14 +11,13 @@ const getStringWithUpperCaseFirst = (string) => {
   return string[0].toUpperCase() + string.slice(1);
 };
 
-const hyphenOrWhiteSpaceRegExp = /[-|\s]+/g;
-
+// Formatting
 const formatToScreamingSnakeCase = (string) => {
   if (!string) {
     return string;
   }
 
-  return string.replace(hyphenOrWhiteSpaceRegExp, '_').toUpperCase();
+  return string.replace(HYPHEN_OR_WHITESPACE_REGEXP, '_').toUpperCase();
 };
 
 const formatToKebabCase = (string) => {
@@ -24,7 +25,7 @@ const formatToKebabCase = (string) => {
     return string;
   }
 
-  return string.replace(hyphenOrWhiteSpaceRegExp, '-').toLowerCase();
+  return string.replace(HYPHEN_OR_WHITESPACE_REGEXP, '-').toLowerCase();
 };
 
 // Проверки

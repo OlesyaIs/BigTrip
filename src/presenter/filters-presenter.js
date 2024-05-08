@@ -9,6 +9,7 @@ export default class FiltersPresenter {
   #filtersComponent = null;
 
   #onFilterTypeChange = null;
+  #filterAvailability = null;
 
   constructor({filtersModel, filtersContainer, onFilterChange}) {
     this.#filtersModel = filtersModel;
@@ -20,11 +21,13 @@ export default class FiltersPresenter {
     return [...this.#filtersModel.filters];
   }
 
-  init() {
+  init({filterAvailability = this.#filterAvailability}) {
     const previousFiltersComponent = this.#filtersComponent;
+    this.#filterAvailability = filterAvailability;
 
     this.#filtersComponent = new FilterView({
       filters: this.filters,
+      filterAvailability: this.#filterAvailability,
       currentFilter: this.#filtersModel.currentFilter,
       onFilterChange: this.#handleFilterTypeChange
     });

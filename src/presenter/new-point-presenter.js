@@ -33,15 +33,15 @@ export default class NewPointPresenter {
     return {...this.#pointsModel.offerPack};
   }
 
-  get typePack() {
-    return {...this.#pointsModel.typePack};
+  get pointsType() {
+    return {...this.#pointsModel.pointsType};
   }
 
   init() {
     this.#pointItemComponent = new PointItemView();
     this.#pointEditComponent = new PointEditView({
       mode: PointEditMode.ADD,
-      typePack: this.typePack,
+      pointsType: this.pointsType,
       destinations: this.destinations,
       offerPack: this.offerPack,
       onSubmit: this.#handleFormSubmit,
@@ -72,6 +72,8 @@ export default class NewPointPresenter {
     this.#pointEditComponent = null;
     this.#pointItemComponent = null;
     document.removeEventListener('keydown', this.#onEscKeydown);
+
+    this.#handleDestroy();
   }
 
   setSaving() {
@@ -93,10 +95,6 @@ export default class NewPointPresenter {
     this.#pointEditComponent.shake(resetFormState);
   }
 
-  #handleNewPointDestroy() {
-    this.#handleDestroy();
-  }
-
   #handleUpdateElement = () => {
     this.#formValidator.destroy();
     this.#formValidator.init({
@@ -112,14 +110,13 @@ export default class NewPointPresenter {
 
     this.#handleDataChange(
       UserAction.ADD_POINT,
-      UpdateType.BOARD_WITH_INFO,
+      UpdateType.FULL,
       {...point}
     );
-    // this.#handleNewPointDestroy();
   };
 
   #handleCancelClick = () => {
-    this.#handleNewPointDestroy();
+    this.destroy();
   };
 
   #handlePriceInput = () => {
@@ -132,6 +129,6 @@ export default class NewPointPresenter {
     }
 
     evt.preventDefault();
-    this.#handleNewPointDestroy();
+    this.destroy();
   };
 }

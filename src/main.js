@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
-import TripApiService from './trip-api-service.js';
 import { EndPoint } from './const.js';
 
+import TripApiService from './trip-api-service.js';
 import TripPresenter from './presenter/trip-presenter.js';
 import FiltersModel from './model/filters-model.js';
 import SortModel from './model/sort-model.js';
