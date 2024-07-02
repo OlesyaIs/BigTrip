@@ -31,8 +31,8 @@ jobs:
         with:
           folder: build
           clean: true
-          git-config-name: "keksobot"
-          git-config-email: "github+keksobot@htmlacademy.ru"
+          git-config-name: "gh-pages"
+          git-config-email: "github+isichenko.ok@gmail.com"
           target-folder: ${{ env.PR }}
           commit-message: "✔️ Сборка #${{ env.PR }}"
 
